@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Detalle de Rutina - HEALTHY LIFE{% endblock %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header bg-info text-white">
+    <h4 class="mb-0"><i class="fas fa-info-circle me-2"></i>Detalle de Rutina</h4>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>Nombre:</strong>
+            <span class="fw-bold text-success">{{ dato.nombre }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>Tipo:</strong>
+            <span class="badge bg-primary">{{ dato.tipo }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>Duración:</strong>
+            <span>{{ dato.duracion }}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>Frecuencia:</strong>
+            <span>{{ dato.frecuencia or 'No especificada' }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <strong>Nivel:</strong>
+            {% if dato.nivel == 'Principiante' %}
+              <span class="badge bg-success">{{ dato.nivel }}</span>
+            {% elif dato.nivel == 'Intermedio' %}
+              <span class="badge bg-warning text-dark">{{ dato.nivel }}</span>
+            {% elif dato.nivel == 'Avanzado' %}
+              <span class="badge bg-danger">{{ dato.nivel }}</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ dato.nivel or 'No especificado' }}</span>
+            {% endif %}
+          </li>
+        </ul>
+      </div>
+    </div>
+    {% if dato.descripcion %}
+    <div class="mt-4">
+      <h5 class="text-success">Descripción:</h5>
+      <div class="card bg-light">
+        <div class="card-body">
+          <p class="mb-0">{{ dato.descripcion }}</p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    <div class="mt-4">
+      <a class="btn btn-outline-secondary" href="{{ url_for('index') }}">
+        <i class="fas fa-arrow-left me-1"></i>Volver al Listado
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
