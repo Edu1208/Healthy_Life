@@ -1,0 +1,433 @@
+{% extends "base.html" %}
+{% block title %}Mis Notas - Healthy Life{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="display-5 fw-bold text-success">Mis Notas</h1>
+      <p class="lead text-muted">Organiza tus rutinas y progreso</p>
+    </div>
+    <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalNuevaNota">
+      <i class="bi bi-plus-circle me-2"></i>Añadir Nota
+    </button>
+  </div>
+
+  <div class="row g-4" id="listaNotas">
+    <!-- Las notas se cargarán dinámicamente -->
+  </div>
+
+  <!-- Filtros -->
+  <div class="mt-5">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title"><i class="bi bi-funnel me-2"></i>Filtrar notas</h5>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Categoría</label>
+            <select class="form-select" id="filterCategoria">
+              <option value="">Todas las categorías</option>
+              <option value="Fuerza">Fuerza</option>
+              <option value="Cardio">Cardio</option>
+              <option value="Nutrición">Nutrición</option>
+              <option value="Progreso">Progreso</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Estado</label>
+            <select class="form-select" id="filterEstado">
+              <option value="">Todos los estados</option>
+              <option value="Activa">Activas</option>
+              <option value="Completada">Completadas</option>
+              <option value="Archivada">Archivadas</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Ordenar por</label>
+            <select class="form-select" id="filterOrden">
+              <option value="reciente">Más recientes</option>
+              <option value="antiguo">Más antiguas</option>
+              <option value="alfabetico">Alfabéticamente</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-3">
+          <button class="btn btn-primary" onclick="aplicarFiltrosNotas()">
+            <i class="bi bi-funnel me-1"></i>Aplicar Filtros
+          </button>
+          <button class="btn btn-outline-secondary" onclick="limpiarFiltrosNotas()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Nueva Nota -->
+<div class="modal fade" id="modalNuevaNota" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Crear Nueva Nota</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formNuevaNota">
+          <div class="mb-3">
+            <label class="form-label">Título *</label>
+            <input type="text" class="form-control" id="notaTitulo" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <textarea class="form-control" id="notaDescripcion" rows="3"></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <label class="form-label">Categoría</label>
+              <select class="form-select" id="notaCategoria">
+                <option value="Fuerza">Fuerza</option>
+                <option value="Cardio">Cardio</option>
+                <option value="Nutrición">Nutrición</option>
+                <option value="Progreso">Progreso</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Estado</label>
+              <select class="form-select" id="notaEstado">
+                <option value="Activa">Activa</option>
+                <option value="Completada">Completada</option>
+                <option value="Archivada">Archivada</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" onclick="guardarNota()">Guardar Nota</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Editar Nota -->
+<div class="modal fade" id="modalEditarNota" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Nota</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="contenidoEditarNota">
+        <!-- Contenido dinámico -->
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let notas = JSON.parse(localStorage.getItem('notas_healthy_life')) || [
+  {
+    id: 1,
+    titulo: "Rutina de Fuerza",
+    descripcion: "Sesión de entrenamiento enfocada en ejercicios compuestos para ganar fuerza muscular.",
+    categoria: "Fuerza",
+    estado: "Activa",
+    fecha: "Hace 2 días",
+    imagen: "static/img/pesas.webp"
+  },
+  {
+    id: 2,
+    titulo: "Sesión de Cardio",
+    descripcion: "Rutina de ejercicios cardiovasculares para mejorar resistencia y quema de grasa.",
+    categoria: "Cardio",
+    estado: "Activa",
+    fecha: "Hace 1 semana",
+    imagen: "static/img/cardio.jpg"
+  },
+  {
+    id: 3,
+    titulo: "Plan Alimenticio",
+    descripcion: "Dieta equilibrada para mantener el peso ideal y proporcionar energía para entrenamientos.",
+    categoria: "Nutrición",
+    estado: "Completada",
+    fecha: "Hace 3 semanas",
+    imagen: "static/img/alimentacion.jpg"
+  }
+];
+
+let notaEditando = null;
+
+// Cargar notas al iniciar
+document.addEventListener('DOMContentLoaded', function() {
+  cargarNotas();
+});
+
+function cargarNotas(notasFiltradas = notas) {
+  const listaNotas = document.getElementById('listaNotas');
+  listaNotas.innerHTML = '';
+
+  if (notasFiltradas.length === 0) {
+    listaNotas.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <h4 class="text-muted mt-3">No se encontraron notas</h4>
+        <p class="text-muted">No hay notas que coincidan con los filtros aplicados.</p>
+      </div>
+    `;
+    return;
+  }
+
+  notasFiltradas.forEach(nota => {
+    const badgeColor = getBadgeColorNota(nota.estado);
+    const categoriaColor = getCategoriaColor(nota.categoria);
+    
+    const notaHTML = `
+      <div class="col-md-6 col-lg-4">
+        <div class="card note-card">
+          <div class="card-img-container">
+            <img src="${nota.imagen}" class="card-img-top" alt="${nota.titulo}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjhmOWZhIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0jOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPk5vdGEgZGUgRWplcmNpY2lvPC90ZXh0Pjwvc3ZnPg=='">
+          </div>
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title">${nota.titulo}</h5>
+              <span class="badge ${badgeColor}">${nota.estado}</span>
+            </div>
+            <p class="card-text flex-grow-1">${nota.descripcion}</p>
+            <div class="mt-auto">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted"><i class="bi bi-calendar me-1"></i>${nota.fecha}</small>
+                <small class="text-muted"><i class="bi bi-tag me-1"></i>${nota.categoria}</small>
+              </div>
+              <div class="btn-group w-100">
+                <button class="btn btn-outline-warning btn-sm" onclick="editarNota(${nota.id})">
+                  <i class="bi bi-pencil me-1"></i>Editar
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="eliminarNota(${nota.id})">
+                  <i class="bi bi-trash me-1"></i>Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    listaNotas.innerHTML += notaHTML;
+  });
+
+  // Agregar card para nueva nota
+  listaNotas.innerHTML += `
+    <div class="col-md-6 col-lg-4">
+      <div class="card note-card border-dashed">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-5" style="cursor: pointer;" onclick="abrirModalNuevaNota()">
+          <i class="bi bi-plus-circle display-4 text-muted mb-3"></i>
+          <h5 class="text-muted">Crear Nueva Nota</h5>
+          <p class="text-muted">Organiza tu próximo entrenamiento o plan</p>
+          <button class="btn btn-outline-success mt-2">
+            <i class="bi bi-plus me-1"></i>Añadir
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function abrirModalNuevaNota() {
+  notaEditando = null;
+  document.getElementById('formNuevaNota').reset();
+  const modal = new bootstrap.Modal(document.getElementById('modalNuevaNota'));
+  modal.show();
+}
+
+function guardarNota() {
+  const titulo = document.getElementById('notaTitulo').value.trim();
+  const descripcion = document.getElementById('notaDescripcion').value.trim();
+  const categoria = document.getElementById('notaCategoria').value;
+  const estado = document.getElementById('notaEstado').value;
+
+  if (!titulo) {
+    mostrarMensaje('Por favor ingresa un título para la nota.', 'warning');
+    return;
+  }
+
+  if (notaEditando) {
+    // Editar nota existente
+    const index = notas.findIndex(n => n.id === notaEditando);
+    if (index !== -1) {
+      notas[index] = {
+        ...notas[index],
+        titulo,
+        descripcion,
+        categoria,
+        estado,
+        fecha: 'Editada recientemente'
+      };
+    }
+  } else {
+    // Crear nueva nota
+    const nuevaNota = {
+      id: Math.max(...notas.map(n => n.id), 0) + 1,
+      titulo,
+      descripcion,
+      categoria,
+      estado,
+      fecha: 'Hoy',
+      imagen: getImagenPorCategoria(categoria)
+    };
+    notas.unshift(nuevaNota);
+  }
+
+  guardarEnLocalStorage();
+  cargarNotas();
+  
+  const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevaNota'));
+  modal.hide();
+  
+  mostrarMensaje(notaEditando ? 'Nota actualizada correctamente' : 'Nota creada correctamente', 'success');
+}
+
+function editarNota(id) {
+  const nota = notas.find(n => n.id === id);
+  if (!nota) return;
+
+  notaEditando = id;
+  
+  document.getElementById('notaTitulo').value = nota.titulo;
+  document.getElementById('notaDescripcion').value = nota.descripcion;
+  document.getElementById('notaCategoria').value = nota.categoria;
+  document.getElementById('notaEstado').value = nota.estado;
+  
+  const modal = new bootstrap.Modal(document.getElementById('modalNuevaNota'));
+  modal.show();
+}
+
+function eliminarNota(id) {
+  if (confirm('¿Estás seguro de que quieres eliminar esta nota? Esta acción no se puede deshacer.')) {
+    notas = notas.filter(n => n.id !== id);
+    guardarEnLocalStorage();
+    cargarNotas();
+    mostrarMensaje('Nota eliminada correctamente', 'success');
+  }
+}
+
+function aplicarFiltrosNotas() {
+  const categoria = document.getElementById('filterCategoria').value;
+  const estado = document.getElementById('filterEstado').value;
+  const orden = document.getElementById('filterOrden').value;
+
+  let notasFiltradas = notas.filter(nota => {
+    let coincide = true;
+    
+    if (categoria && nota.categoria !== categoria) coincide = false;
+    if (estado && nota.estado !== estado) coincide = false;
+    
+    return coincide;
+  });
+
+  // Aplicar orden
+  if (orden === 'reciente') {
+    notasFiltradas.sort((a, b) => b.id - a.id);
+  } else if (orden === 'antiguo') {
+    notasFiltradas.sort((a, b) => a.id - b.id);
+  } else if (orden === 'alfabetico') {
+    notasFiltradas.sort((a, b) => a.titulo.localeCompare(b.titulo));
+  }
+
+  cargarNotas(notasFiltradas);
+  mostrarMensaje(`Filtros aplicados: ${notasFiltradas.length} notas encontradas`, 'info');
+}
+
+function limpiarFiltrosNotas() {
+  document.getElementById('filterCategoria').value = '';
+  document.getElementById('filterEstado').value = '';
+  document.getElementById('filterOrden').value = 'reciente';
+  
+  cargarNotas();
+  mostrarMensaje('Filtros limpiados correctamente', 'info');
+}
+
+function guardarEnLocalStorage() {
+  localStorage.setItem('notas_healthy_life', JSON.stringify(notas));
+}
+
+// Funciones auxiliares
+function getBadgeColorNota(estado) {
+  const colores = {
+    'Activa': 'bg-success',
+    'Completada': 'bg-secondary',
+    'Archivada': 'bg-warning'
+  };
+  return colores[estado] || 'bg-secondary';
+}
+
+function getCategoriaColor(categoria) {
+  const colores = {
+    'Fuerza': 'primary',
+    'Cardio': 'danger',
+    'Nutrición': 'success',
+    'Progreso': 'info'
+  };
+  return colores[categoria] || 'secondary';
+}
+
+function getImagenPorCategoria(categoria) {
+  const imagenes = {
+    'Fuerza': 'static/img/pesas.webp',
+    'Cardio': 'static/img/cardio.jpg',
+    'Nutrición': 'static/img/alimentacion.jpg',
+    'Progreso': 'static/img/progreso.jpg'
+  };
+  return imagenes[categoria] || 'static/img/default.jpg';
+}
+
+function mostrarMensaje(mensaje, tipo) {
+  const alerta = document.createElement('div');
+  alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+  alerta.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+  alerta.innerHTML = `
+    ${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  
+  document.body.appendChild(alerta);
+  
+  setTimeout(() => {
+    if (alerta.parentNode) alerta.remove();
+  }, 3000);
+}
+</script>
+
+<style>
+.card-img-container {
+  height: 180px;
+  overflow: hidden;
+}
+
+.card-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.note-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.note-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.border-dashed {
+  border: 2px dashed #dee2e6 !important;
+}
+
+.border-dashed:hover {
+  border-color: #198754 !important;
+}
+</style>
+{% endblock %}

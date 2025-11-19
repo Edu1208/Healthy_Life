@@ -1,0 +1,539 @@
+{% extends "base.html" %}
+{% block title %}Historial de Rutinas - Healthy Life{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="display-5 fw-bold text-success">Historial de Rutinas</h1>
+      <p class="lead text-muted">Revisa tu progreso y rutinas completadas</p>
+    </div>
+    <a href="{{ url_for('nuevo') }}" class="btn btn-success btn-lg">
+      <i class="bi bi-plus-circle me-2"></i>Nueva Rutina
+    </a>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card card-modern mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label fw-medium">Tipo de Rutina</label>
+          <select class="form-select" id="filterType">
+            <option value="">Todos los tipos</option>
+            <option value="fuerza">Fuerza</option>
+            <option value="cardio">Cardio</option>
+            <option value="velocidad">Velocidad</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-medium">Estado</label>
+          <select class="form-select" id="filterStatus">
+            <option value="">Todos los estados</option>
+            <option value="completada">Completada</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="en-progreso">En Progreso</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-medium">Fecha Desde</label>
+          <input type="date" class="form-control" id="filterDateFrom">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-medium">Fecha Hasta</label>
+          <input type="date" class="form-control" id="filterDateTo">
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-12">
+          <button class="btn btn-primary me-2" onclick="aplicarFiltros()">
+            <i class="bi bi-funnel me-1"></i>Aplicar Filtros
+          </button>
+          <button class="btn btn-outline-secondary" onclick="limpiarFiltros()">
+            <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas Rápidas -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card card-modern text-center">
+        <div class="card-body">
+          <h3 class="text-success" id="totalRutinas">8</h3>
+          <p class="text-muted mb-0">Total Rutinas</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-modern text-center">
+        <div class="card-body">
+          <h3 class="text-primary" id="rutinasCompletadas">6</h3>
+          <p class="text-muted mb-0">Completadas</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-modern text-center">
+        <div class="card-body">
+          <h3 class="text-warning" id="rutinasPendientes">1</h3>
+          <p class="text-muted mb-0">Pendientes</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card card-modern text-center">
+        <div class="card-body">
+          <h3 class="text-info" id="minutosTotales">315</h3>
+          <p class="text-muted mb-0">Minutos Totales</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Rutinas -->
+  <div class="row g-4" id="listaRutinas">
+    <!-- Las rutinas se cargarán dinámicamente -->
+  </div>
+
+  <!-- Paginación -->
+  <nav aria-label="Page navigation" class="mt-5">
+    <ul class="pagination justify-content-center" id="paginacion">
+      <li class="page-item disabled">
+        <a class="page-link" href="#" tabindex="-1">Anterior</a>
+      </li>
+      <li class="page-item active"><a class="page-link" href="#">1</a></li>
+      <li class="page-item"><a class="page-link" href="#">2</a></li>
+      <li class="page-item"><a class="page-link" href="#">3</a></li>
+      <li class="page-item">
+        <a class="page-link" href="#">Siguiente</a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<!-- Modal para Ver Rutina -->
+<div class="modal fade" id="modalVerRutina" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitulo">Detalles de Rutina</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalContenido">
+        <!-- Contenido dinámico -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-success" onclick="iniciarRutina()">Comenzar Rutina</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div class="modal fade" id="modalConfirmacion" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar Acción</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalConfirmacionTexto">
+        ¿Estás seguro de que quieres eliminar esta rutina?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmarAccion">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Datos de ejemplo para las rutinas
+const rutinas = [
+  {
+    id: 1,
+    nombre: "Rutina de Fuerza Avanzada",
+    descripcion: "Enfoque en ejercicios compuestos para desarrollo muscular completo",
+    tipo: "fuerza",
+    nivel: "Avanzado",
+    duracion: 60,
+    fecha: "Hoy, 10:30 AM",
+    estado: "completada",
+    ejercicios: [
+      "Press de banca: 4x8-12",
+      "Sentadillas: 4x8-10", 
+      "Peso muerto: 3x6-8",
+      "Dominadas: 3x8-10",
+      "Press militar: 3x10-12"
+    ]
+  },
+  {
+    id: 2,
+    nombre: "Cardio HIIT Intenso",
+    descripcion: "Entrenamiento por intervalos de alta intensidad para quema de grasa",
+    tipo: "cardio",
+    nivel: "Intermedio",
+    duracion: 45,
+    fecha: "Ayer, 08:15 AM",
+    estado: "completada",
+    ejercicios: [
+      "Burpees: 30 segundos",
+      "Descanso: 15 segundos",
+      "Mountain climbers: 30 segundos",
+      "Descanso: 15 segundos",
+      "Saltos de tijera: 30 segundos",
+      "Descanso: 15 segundos",
+      "Repetir circuito 8 veces"
+    ]
+  },
+  {
+    id: 3,
+    nombre: "Entrenamiento de Velocidad",
+    descripcion: "Sprints y ejercicios de agilidad para mejorar velocidad",
+    tipo: "velocidad",
+    nivel: "Principiante",
+    duracion: 30,
+    fecha: "Programada: Mañana",
+    estado: "pendiente",
+    ejercicios: [
+      "Sprints 50m: 8 repeticiones",
+      "Saltos de caja: 3x10",
+      "Escalera de agilidad: 5 vueltas",
+      "Saltos con rodillas al pecho: 3x15"
+    ]
+  },
+  {
+    id: 4,
+    nombre: "Fuerza Superior",
+    descripcion: "Enfoque en pecho, hombros y espalda",
+    tipo: "fuerza",
+    nivel: "Avanzado",
+    duracion: 75,
+    fecha: "16/10/2025",
+    estado: "completada",
+    ejercicios: [
+      "Press de banca inclinado: 4x8-10",
+      "Remo con barra: 4x8-10",
+      "Press militar: 3x8-12",
+      "Jalón al pecho: 3x10-12",
+      "Elevaciones laterales: 3x12-15"
+    ]
+  },
+  {
+    id: 5,
+    nombre: "Cardio de Resistencia",
+    descripcion: "Entrenamiento continuo para mejorar capacidad aeróbica",
+    tipo: "cardio",
+    nivel: "Principiante",
+    duracion: 40,
+    fecha: "15/10/2025",
+    estado: "completada",
+    ejercicios: [
+      "Trotar: 20 minutos",
+      "Bicicleta estática: 15 minutos",
+      "Caminata rápida: 5 minutos"
+    ]
+  },
+  {
+    id: 6,
+    nombre: "Full Body",
+    descripcion: "Rutina completa para todo el cuerpo",
+    tipo: "fuerza",
+    nivel: "Intermedio",
+    duracion: 55,
+    fecha: "En progreso",
+    estado: "en-progreso",
+    ejercicios: [
+      "Sentadillas: 4x10",
+      "Flexiones: 3x15",
+      "Peso muerto: 3x8",
+      "Fondos: 3x10",
+      "Plancha: 3x60 segundos"
+    ]
+  }
+];
+
+let rutinaSeleccionada = null;
+
+// Cargar rutinas al iniciar
+document.addEventListener('DOMContentLoaded', function() {
+  cargarRutinas();
+  actualizarEstadisticas();
+});
+
+function cargarRutinas(filtradas = rutinas) {
+  const listaRutinas = document.getElementById('listaRutinas');
+  listaRutinas.innerHTML = '';
+
+  if (filtradas.length === 0) {
+    listaRutinas.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <h4 class="text-muted mt-3">No se encontraron rutinas</h4>
+        <p class="text-muted">No hay rutinas que coincidan con los filtros aplicados.</p>
+      </div>
+    `;
+    return;
+  }
+
+  filtradas.forEach(rutina => {
+    const badgeColor = getBadgeColor(rutina.tipo);
+    const estadoColor = getEstadoColor(rutina.estado);
+    
+    const rutinaHTML = `
+      <div class="col-12">
+        <div class="card card-modern">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <div class="d-flex align-items-start mb-2">
+                  <div class="${badgeColor} bg-opacity-10 p-2 rounded me-3">
+                    <i class="${getTipoIcono(rutina.tipo)} ${badgeColor} fs-4"></i>
+                  </div>
+                  <div>
+                    <h4 class="card-title mb-1">${rutina.nombre}</h4>
+                    <p class="text-muted mb-2">${rutina.descripcion}</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                      <span class="badge ${badgeColor}">${rutina.tipo.charAt(0).toUpperCase() + rutina.tipo.slice(1)}</span>
+                      <span class="badge bg-warning">${rutina.nivel}</span>
+                      <span class="badge bg-info">${rutina.duracion} min</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 text-md-end">
+                <div class="mb-2">
+                  <span class="badge ${estadoColor} fs-6">${getEstadoTexto(rutina.estado)}</span>
+                </div>
+                <div class="text-muted mb-2">
+                  <i class="bi bi-calendar me-1"></i>${rutina.fecha}
+                </div>
+                <div class="btn-group">
+                  <button class="btn btn-outline-primary btn-sm" onclick="verRutina(${rutina.id})">
+                    <i class="bi bi-eye me-1"></i>Ver
+                  </button>
+                  <button class="btn btn-outline-success btn-sm" onclick="repetirRutina(${rutina.id})">
+                    <i class="bi bi-repeat me-1"></i>Repetir
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" onclick="eliminarRutina(${rutina.id})">
+                    <i class="bi bi-trash me-1"></i>Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    listaRutinas.innerHTML += rutinaHTML;
+  });
+}
+
+function aplicarFiltros() {
+  const tipo = document.getElementById('filterType').value;
+  const estado = document.getElementById('filterStatus').value;
+  const fechaDesde = document.getElementById('filterDateFrom').value;
+  const fechaHasta = document.getElementById('filterDateTo').value;
+
+  let rutinasFiltradas = rutinas.filter(rutina => {
+    let coincide = true;
+    
+    if (tipo && rutina.tipo !== tipo) coincide = false;
+    if (estado && rutina.estado !== estado) coincide = false;
+    
+    return coincide;
+  });
+
+  cargarRutinas(rutinasFiltradas);
+  actualizarEstadisticas(rutinasFiltradas);
+  
+  // Mostrar mensaje de éxito
+  mostrarMensaje(`Filtros aplicados: ${rutinasFiltradas.length} rutinas encontradas`, 'success');
+}
+
+function limpiarFiltros() {
+  document.getElementById('filterType').value = '';
+  document.getElementById('filterStatus').value = '';
+  document.getElementById('filterDateFrom').value = '';
+  document.getElementById('filterDateTo').value = '';
+  
+  cargarRutinas();
+  actualizarEstadisticas();
+  
+  mostrarMensaje('Filtros limpiados correctamente', 'info');
+}
+
+function verRutina(id) {
+  const rutina = rutinas.find(r => r.id === id);
+  rutinaSeleccionada = rutina;
+  
+  const modalTitulo = document.getElementById('modalTitulo');
+  const modalContenido = document.getElementById('modalContenido');
+  
+  modalTitulo.textContent = rutina.nombre;
+  
+  const ejerciciosHTML = rutina.ejercicios.map(ej => `<li class="list-group-item">${ej}</li>`).join('');
+  
+  modalContenido.innerHTML = `
+    <div class="row">
+      <div class="col-md-6">
+        <h6>Información General</h6>
+        <ul class="list-unstyled">
+          <li><strong>Tipo:</strong> <span class="badge ${getBadgeColor(rutina.tipo)}">${rutina.tipo.charAt(0).toUpperCase() + rutina.tipo.slice(1)}</span></li>
+          <li><strong>Nivel:</strong> <span class="badge bg-warning">${rutina.nivel}</span></li>
+          <li><strong>Duración:</strong> ${rutina.duracion} minutos</li>
+          <li><strong>Estado:</strong> <span class="badge ${getEstadoColor(rutina.estado)}">${getEstadoTexto(rutina.estado)}</span></li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h6>Descripción</h6>
+        <p>${rutina.descripcion}</p>
+      </div>
+    </div>
+    <div class="mt-3">
+      <h6>Ejercicios</h6>
+      <ul class="list-group">
+        ${ejerciciosHTML}
+      </ul>
+    </div>
+  `;
+  
+  const modal = new bootstrap.Modal(document.getElementById('modalVerRutina'));
+  modal.show();
+}
+
+function repetirRutina(id) {
+  const rutina = rutinas.find(r => r.id === id);
+  
+  // Crear una nueva rutina basada en la existente
+  const nuevaRutina = {
+    ...rutina,
+    id: Math.max(...rutinas.map(r => r.id)) + 1,
+    fecha: 'Programada: Hoy',
+    estado: 'pendiente'
+  };
+  
+  rutinas.unshift(nuevaRutina);
+  cargarRutinas();
+  actualizarEstadisticas();
+  
+  mostrarMensaje(`Rutina "${rutina.nombre}" agregada para repetir`, 'success');
+}
+
+function eliminarRutina(id) {
+  const rutina = rutinas.find(r => r.id === id);
+  
+  document.getElementById('modalConfirmacionTexto').textContent = 
+    `¿Estás seguro de que quieres eliminar la rutina "${rutina.nombre}"? Esta acción no se puede deshacer.`;
+  
+  const btnConfirmar = document.getElementById('btnConfirmarAccion');
+  btnConfirmar.onclick = function() {
+    const index = rutinas.findIndex(r => r.id === id);
+    if (index !== -1) {
+      rutinas.splice(index, 1);
+      cargarRutinas();
+      actualizarEstadisticas();
+      mostrarMensaje('Rutina eliminada correctamente', 'success');
+    }
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmacion'));
+    modal.hide();
+  };
+  
+  const modal = new bootstrap.Modal(document.getElementById('modalConfirmacion'));
+  modal.show();
+}
+
+function iniciarRutina() {
+  if (rutinaSeleccionada) {
+    rutinaSeleccionada.estado = 'en-progreso';
+    rutinaSeleccionada.fecha = 'En progreso';
+    
+    cargarRutinas();
+    actualizarEstadisticas();
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalVerRutina'));
+    modal.hide();
+    
+    mostrarMensaje(`¡Comenzando rutina "${rutinaSeleccionada.nombre}"!`, 'success');
+  }
+}
+
+function actualizarEstadisticas(rutinasMostradas = rutinas) {
+  const total = rutinasMostradas.length;
+  const completadas = rutinasMostradas.filter(r => r.estado === 'completada').length;
+  const pendientes = rutinasMostradas.filter(r => r.estado === 'pendiente').length;
+  const minutos = rutinasMostradas.reduce((sum, r) => sum + r.duracion, 0);
+  
+  document.getElementById('totalRutinas').textContent = total;
+  document.getElementById('rutinasCompletadas').textContent = completadas;
+  document.getElementById('rutinasPendientes').textContent = pendientes;
+  document.getElementById('minutosTotales').textContent = minutos;
+}
+
+function mostrarMensaje(mensaje, tipo) {
+  // Crear alerta temporal
+  const alerta = document.createElement('div');
+  alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+  alerta.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+  alerta.innerHTML = `
+    ${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  
+  document.body.appendChild(alerta);
+  
+  // Remover después de 3 segundos
+  setTimeout(() => {
+    if (alerta.parentNode) {
+      alerta.remove();
+    }
+  }, 3000);
+}
+
+// Funciones auxiliares
+function getBadgeColor(tipo) {
+  const colores = {
+    'fuerza': 'bg-primary',
+    'cardio': 'bg-danger', 
+    'velocidad': 'bg-warning'
+  };
+  return colores[tipo] || 'bg-secondary';
+}
+
+function getEstadoColor(estado) {
+  const colores = {
+    'completada': 'bg-success',
+    'pendiente': 'bg-secondary',
+    'en-progreso': 'bg-info'
+  };
+  return colores[estado] || 'bg-secondary';
+}
+
+function getEstadoTexto(estado) {
+  const textos = {
+    'completada': 'Completada',
+    'pendiente': 'Pendiente',
+    'en-progreso': 'En Progreso'
+  };
+  return textos[estado] || estado;
+}
+
+function getTipoIcono(tipo) {
+  const iconos = {
+    'fuerza': 'bi bi-dumbbell',
+    'cardio': 'bi bi-heart-pulse',
+    'velocidad': 'bi bi-lightning-charge'
+  };
+  return iconos[tipo] || 'bi bi-activity';
+}
+</script>
+{% endblock %}

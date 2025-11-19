@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Healthy_Life</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #10B981;
+            --dark-green: #047857;
+            --light-green: #ECFDF5;
+            --black: #1F2937;
+            --white: #FFFFFF;
+            --gray: #6B7280;
+            --light-gray: #F9FAFB;
+        }
+        
+        body {
+            background-color: var(--white);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .auth-container {
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        .auth-card {
+            background: var(--white);
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo-icon {
+            background: var(--primary-green);
+            color: var(--white);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--black);
+            margin: 0;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .form-control {
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .btn-success {
+            background: var(--primary-green);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-success:hover {
+            background: var(--dark-green);
+            transform: translateY(-1px);
+        }
+        
+        .password-strength {
+            height: 4px;
+            margin-top: 8px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            background-color: #E5E7EB;
+        }
+        
+        .strength-weak { background-color: #EF4444; width: 33%; }
+        .strength-medium { background-color: #F59E0B; width: 66%; }
+        .strength-strong { background-color: var(--primary-green); width: 100%; }
+        
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+        
+        .divider::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #E5E7EB;
+        }
+        
+        .divider span {
+            background: var(--white);
+            padding: 0 1rem;
+            position: relative;
+        }
+        
+        .link {
+            color: var(--primary-green);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+        
+        .link:hover {
+            color: var(--dark-green);
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+            font-size: 0.875rem;
+            padding: 0.75rem 1rem;
+        }
+        
+        .footer-links {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E5E7EB;
+        }
+        
+        .footer-links a {
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.2s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--black);
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        
+        .feature-list li {
+            padding: 0.25rem 0;
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+        
+        .feature-list li::before {
+            content: "✓";
+            color: var(--primary-green);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <!-- Logo -->
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <h1>Healthy_Life</h1>
+                </div>
+
+                <!-- Mensajes Flash -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Formulario de Registro -->
+                <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre completo</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="nombre" 
+                               name="nombre" 
+                               value="{{ request.form.nombre if request.form }}"
+                               required 
+                               placeholder="Tu nombre">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo electrónico</label>
+                        <input type="email" 
+                               class="form-control" 
+                               id="email" 
+                               name="email" 
+                               value="{{ request.form.email if request.form }}"
+                               required 
+                               placeholder="tu@email.com">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               required 
+                               placeholder="Mínimo 6 caracteres"
+                               minlength="6">
+                        <div class="password-strength" id="passwordStrength"></div>
+                        <small class="form-text text-muted" style="font-size: 0.75rem; color: var(--gray);">
+                            La contraseña debe tener al menos 6 caracteres.
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirmar contraseña</label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="confirm_password" 
+                               name="confirm_password" 
+                               required 
+                               placeholder="Repite tu contraseña">
+                        <div class="invalid-feedback" id="passwordMatchError" style="display: none; font-size: 0.75rem;">
+                            Las contraseñas no coinciden.
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success mb-3" id="submitBtn">
+                        Crear Cuenta
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>¿Ya tienes cuenta?</span>
+                </div>
+
+                <div class="text-center">
+                    <a href="{{ url_for('login') }}" class="link">
+                        Iniciar Sesión
+                    </a>
+                </div>
+
+                <!-- Beneficios -->
+                <div class="mt-4">
+                    <ul class="feature-list">
+                        <li>Seguimiento de rutinas personalizadas</li>
+                        <li>Estadísticas de progreso</li>
+                        <li>Sistema de rachas y logros</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer Links -->
+            <div class="footer-links">
+                <a href="{{ url_for('index') }}" class="me-3">Inicio</a>
+                <a href="{{ url_for('ayuda') }}" class="me-3">Ayuda</a>
+                <a href="#">Términos</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm_password');
+            const passwordStrength = document.getElementById('passwordStrength');
+            const submitBtn = document.getElementById('submitBtn');
+            const passwordMatchError = document.getElementById('passwordMatchError');
+
+            // Verificar fortaleza de contraseña
+            password.addEventListener('input', function() {
+                const strength = calculatePasswordStrength(this.value);
+                passwordStrength.className = 'password-strength ' + strength.class;
+            });
+
+            // Verificar coincidencia de contraseñas
+            function checkPasswordMatch() {
+                if (password.value !== confirmPassword.value && confirmPassword.value !== '') {
+                    confirmPassword.classList.add('is-invalid');
+                    passwordMatchError.style.display = 'block';
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.6';
+                } else {
+                    confirmPassword.classList.remove('is-invalid');
+                    passwordMatchError.style.display = 'none';
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                }
+            }
+
+            password.addEventListener('input', checkPasswordMatch);
+            confirmPassword.addEventListener('input', checkPasswordMatch);
+
+            // Calcular fortaleza de contraseña
+            function calculatePasswordStrength(password) {
+                let strength = 0;
+                
+                if (password.length >= 6) strength++;
+                if (password.length >= 8) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+                if (strength <= 1) return { class: 'strength-weak' };
+                if (strength <= 3) return { class: 'strength-medium' };
+                return { class: 'strength-strong' };
+            }
+
+            // Efectos suaves para los inputs
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.style.borderColor = 'var(--primary-green)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.style.borderColor = '#D1D5DB';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

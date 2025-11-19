@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}Inicio - Healthy Life{% endblock %}
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-success text-white rounded-3 p-5 mb-5">
+  <div class="row align-items-center">
+    <div class="col-lg-6">
+      <h1 class="display-4 fw-bold mb-3">Transforma tu Vida con Healthy Life</h1>
+      <p class="lead mb-4">Tu compañero personal para alcanzar tus metas de fitness, nutrición y bienestar. Crea rutinas, sigue tu progreso y mantén la motivación.</p>
+      <div class="d-flex gap-3 flex-wrap">
+        <a href="{{ url_for('nuevo') }}" class="btn btn-light btn-lg fw-bold">
+          <i class="bi bi-plus-circle me-2"></i>Comenzar Rutina
+        </a>
+        <a href="{{ url_for('racha') }}" class="btn btn-outline-light btn-lg">
+          <i class="bi bi-fire me-2"></i>Ver Mi Progreso
+        </a>
+      </div>
+    </div>
+    <div class="col-lg-6 text-center">
+      <div class="hero-stats bg-white bg-opacity-10 rounded-3 p-4 d-inline-block">
+        <div class="row text-center">
+          <div class="col-4">
+            <h3 class="fw-bold text-warning mb-1">11</h3>
+            <small>Días de Racha</small>
+          </div>
+          <div class="col-4">
+            <h3 class="fw-bold text-info mb-1">5</h3>
+            <small>Rutinas Activas</small>
+          </div>
+          <div class="col-4">
+            <h3 class="fw-bold text-success mb-1">85%</h3>
+            <small>Consistencia</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Acciones Rápidas -->
+<div class="row mb-5">
+  <div class="col-12">
+    <h2 class="h3 mb-4 text-center">Acciones Rápidas</h2>
+    <div class="row g-3">
+      <div class="col-md-2 col-6">
+        <a href="{{ url_for('nuevo') }}" class="card card-modern text-center text-decoration-none">
+          <div class="card-body p-3">
+            <i class="bi bi-plus-circle display-6 text-success mb-2"></i>
+            <h6 class="card-title mb-0">Nueva Rutina</h6>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-2 col-6">
+        <a href="{{ url_for('historial_rutinas') }}" class="card card-modern text-center text-decoration-none">
+          <div class="card-body p-3">
+            <i class="bi bi-clock-history display-6 text-primary mb-2"></i>
+            <h6 class="card-title mb-0">Historial</h6>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-2 col-6">
+        <a href="{{ url_for('notas') }}" class="card card-modern text-center text-decoration-none">
+          <div class="card-body p-3">
+            <i class="bi bi-journal-text display-6 text-warning mb-2"></i>
+            <h6 class="card-title mb-0">Mis Notas</h6>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-2 col-6">
+        <a href="{{ url_for('racha') }}" class="card card-modern text-center text-decoration-none">
+          <div class="card-body p-3">
+            <i class="bi bi-fire display-6 text-danger mb-2"></i>
+            <h6 class="card-title mb-0">Mi Racha</h6>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-2 col-6">
+        <a href="{{ url_for('perfil') }}" class="card card-modern text-center text-decoration-none">
+          <div class="card-body p-3">
+            <i class="bi bi-person display-6 text-info mb-2"></i>
+            <h6 class="card-title mb-0">Mi Perfil</h6>
+          </div>
+        </a>
+      </div>
+      <div class="col-md-2 col-6">
+        <a href="{{ url_for('ayuda') }}" class="card card-modern text-center text-decoration-none">
+          <div class="card-body p-3">
+            <i class="bi bi-question-circle display-6 text-secondary mb-2"></i>
+            <h6 class="card-title mb-0">Ayuda</h6>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Rutinas Recientes -->
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card card-modern">
+      <div class="card-header bg-white border-0">
+        <h3 class="card-title mb-0">
+          <i class="bi bi-clock-history text-primary me-2"></i>Rutinas Recientes
+        </h3>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Duración</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>Rutina de Fuerza Avanzada</strong>
+                  <br><small class="text-muted">Enfoque en ejercicios compuestos</small>
+                </td>
+                <td><span class="badge bg-primary">Fuerza</span></td>
+                <td>60 min</td>
+                <td>Hoy</td>
+                <td><span class="badge bg-success">Completada</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Cardio Matutino</strong>
+                  <br><small class="text-muted">HIIT y resistencia</small>
+                </td>
+                <td><span class="badge bg-danger">Cardio</span></td>
+                <td>45 min</td>
+                <td>Ayer</td>
+                <td><span class="badge bg-success">Completada</span></td>
+              </tr>
+              <tr>
+                <td>
+                  <strong>Entrenamiento de Velocidad</strong>
+                  <br><small class="text-muted">Sprints y pliometría</small>
+                </td>
+                <td><span class="badge bg-warning">Velocidad</span></td>
+                <td>30 min</td>
+                <td>16/10/2025</td>
+                <td><span class="badge bg-secondary">Pendiente</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-center mt-3">
+          <a href="{{ url_for('historial_rutinas') }}" class="btn btn-outline-primary">
+            <i class="bi bi-list-ul me-2"></i>Ver Historial Completo
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas Rápidas -->
+  <div class="col-lg-4">
+    <div class="card card-modern mb-4">
+      <div class="card-body text-center">
+        <div class="streak-display mb-3">
+          <i class="bi bi-fire display-1 text-warning"></i>
+          <h2 class="text-warning fw-bold mt-2">11</h2>
+          <p class="text-muted">Días consecutivos</p>
+        </div>
+        <div class="progress mb-3" style="height: 8px;">
+          <div class="progress-bar bg-warning" style="width: 85%"></div>
+        </div>
+        <small class="text-muted">85% de consistencia este mes</small>
+      </div>
+    </div>
+
+    <!-- Próximas Metas -->
+    <div class="card card-modern">
+      <div class="card-header bg-white border-0">
+        <h5 class="card-title mb-0">
+          <i class="bi bi-flag text-success me-2"></i>Próximas Metas
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <div class="bg-success bg-opacity-10 p-2 rounded me-3">
+            <i class="bi bi-fire text-success"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="mb-1">Racha de 30 días</h6>
+            <small class="text-muted">19 días restantes</small>
+          </div>
+          <span class="badge bg-success">35%</span>
+        </div>
+        <div class="d-flex align-items-center mb-3">
+          <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
+            <i class="bi bi-dumbbell text-primary"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="mb-1">Nuevo PR en Press</h6>
+            <small class="text-muted">5 kg para alcanzar</small>
+          </div>
+          <span class="badge bg-primary">60%</span>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="bg-info bg-opacity-10 p-2 rounded me-3">
+            <i class="bi bi-heart-pulse text-info"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="mb-1">Cardio semanal</h6>
+            <small class="text-muted">2 sesiones completadas</small>
+          </div>
+          <span class="badge bg-info">67%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

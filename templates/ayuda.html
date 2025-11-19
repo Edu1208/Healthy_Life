@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Título de la Página - Healthy Life{% endblock %}
+{% block content %}
+  <div class="container py-4">
+    <div class="text-center mb-5">
+      <h1 class="display-5 fw-bold text-success">Centro de Ayuda</h1>
+      <p class="lead">Encuentra respuestas a tus preguntas sobre nutrición y ejercicio</p>
+    </div>
+
+    <!-- Tipos de Comida -->
+    <div class="help-section">
+      <h2 class="h3 mb-3 border-bottom pb-2"><i class="bi bi-egg-fried text-warning me-2"></i>Tipos de comida</h2>
+      <div class="accordion" id="foodAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#foodOne">
+              <i class="bi bi-arrow-down-circle text-success me-2"></i>Bajar de peso
+            </button>
+          </h2>
+          <div id="foodOne" class="accordion-collapse collapse show" data-bs-parent="#foodAccordion">
+            <div class="accordion-body">
+              <p>Para bajar de peso de manera saludable, enfócate en:</p>
+              <ul>
+                <li><strong>Déficit calórico moderado:</strong> Reduce 300-500 calorías de tu mantenimiento</li>
+                <li><strong>Alimentos saciantes:</strong> Proteínas magras, fibra y grasas saludables</li>
+                <li><strong>Evita alimentos ultraprocesados:</strong> Reduce azúcares añadidos y harinas refinadas</li>
+                <li><strong>Hidratación adecuada:</strong> Bebe 2-3 litros de agua al día</li>
+              </ul>
+              <div class="alert alert-info mt-3">
+                <small><i class="bi bi-lightbulb me-1"></i> <strong>Tip:</strong> Incorpora vegetales en cada comida para aumentar volumen sin muchas calorías.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#foodTwo">
+              <i class="bi bi-arrow-up-circle text-primary me-2"></i>Subir de peso
+            </button>
+          </h2>
+          <div id="foodTwo" class="accordion-collapse collapse" data-bs-parent="#foodAccordion">
+            <div class="accordion-body">
+              <p>Para ganar masa muscular de forma limpia:</p>
+              <ul>
+                <li><strong>Superávit calórico controlado:</strong> Aumenta 300-500 calorías sobre tu mantenimiento</li>
+                <li><strong>Proteína suficiente:</strong> 1.6-2.2g por kg de peso corporal</li>
+                <li><strong>Carbohidratos complejos:</strong> Para energía y recuperación</li>
+                <li><strong>Grasas saludables:</strong> Aguacate, frutos secos, aceite de oliva</li>
+              </ul>
+              <div class="alert alert-warning mt-3">
+                <small><i class="bi bi-exclamation-triangle me-1"></i> <strong>Precaución:</strong> Evita el exceso de alimentos altos en grasa saturada y azúcar.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ejercicios Recomendados -->
+    <div class="help-section">
+      <h2 class="h3 mb-3 border-bottom pb-2"><i class="bi bi-activity text-danger me-2"></i>Ejercicios recomendados</h2>
+      <div class="accordion" id="exerciseAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#exerciseOne">
+              <i class="bi bi-dumbbell text-secondary me-2"></i>Fuerza
+            </button>
+          </h2>
+          <div id="exerciseOne" class="accordion-collapse collapse show" data-bs-parent="#exerciseAccordion">
+            <div class="accordion-body">
+              <p>Ejercicios clave para desarrollar fuerza:</p>
+              <div class="row">
+                <div class="col-md-6">
+                  <h6>Ejercicios compuestos:</h6>
+                  <ul>
+                    <li>Sentadillas</li>
+                    <li>Peso muerto</li>
+                    <li>Press de banca</li>
+                    <li>Dominadas</li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <h6>Recomendaciones:</h6>
+                  <ul>
+                    <li>3-4 series de 5-8 repeticiones</li>
+                    <li>2-3 minutos de descanso entre series</li>
+                    <li>Enfócate en la técnica</li>
+                    <li>Progresión gradual</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#exerciseTwo">
+              <i class="bi bi-heart-pulse text-danger me-2"></i>Cardio
+            </button>
+          </h2>
+          <div id="exerciseTwo" class="accordion-collapse collapse" data-bs-parent="#exerciseAccordion">
+            <div class="accordion-body">
+              <p>Mejora tu salud cardiovascular con:</p>
+              <div class="row">
+                <div class="col-md-6">
+                  <h6>Ejercicios de baja intensidad:</h6>
+                  <ul>
+                    <li>Caminata rápida</li>
+                    <li>Ciclismo moderado</li>
+                    <li>Natación recreativa</li>
+                    <li>Elíptica</li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <h6>Ejercicios de alta intensidad:</h6>
+                  <ul>
+                    <li>Correr</li>
+                    <li>Saltar cuerda</li>
+                    <li>Burpees</li>
+                    <li>HIIT</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#exerciseThree">
+              <i class="bi bi-lightning-charge text-warning me-2"></i>Velocidad
+            </button>
+          </h2>
+          <div id="exerciseThree" class="accordion-collapse collapse" data-bs-parent="#exerciseAccordion">
+            <div class="accordion-body">
+              <p>Entrenamientos para mejorar velocidad y agilidad:</p>
+              <ul>
+                <li><strong>Sprints:</strong> 8-10 repeticiones de 50-100m</li>
+                <li><strong>Pliometría:</strong> Saltos de caja, saltos con rodillas al pecho</li>
+                <li><strong>Escalera de agilidad:</strong> Para mejorar coordinación</li>
+                <li><strong>Entrenamiento en colinas:</strong> Sprints en pendiente</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disciplina -->
+    <div class="help-section">
+      <h2 class="h3 mb-3 border-bottom pb-2"><i class="bi bi-star text-warning me-2"></i>Disciplina</h2>
+      <div class="accordion" id="disciplineAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#disciplineOne">
+              <i class="bi bi-question-circle text-info me-2"></i>¿Cómo mantenerse constante?
+            </button>
+          </h2>
+          <div id="disciplineOne" class="accordion-collapse collapse show" data-bs-parent="#disciplineAccordion">
+            <div class="accordion-body">
+              <p>Claves para mantener la constancia en tu rutina:</p>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card border-0 bg-light mb-3">
+                    <div class="card-body">
+                      <h5 class="card-title"><i class="bi bi-bullseye text-primary me-2"></i>Establece metas realistas</h5>
+                      <p class="card-text">Divide tus objetivos grandes en metas pequeñas y alcanzables.</p>
+                    </div>
+                  </div>
+                  <div class="card border-0 bg-light mb-3">
+                    <div class="card-body">
+                      <h5 class="card-title"><i class="bi bi-calendar-check text-success me-2"></i>Crea un hábito</h5>
+                      <p class="card-text">Realiza tu actividad a la misma hora cada día para formar un ritual.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card border-0 bg-light mb-3">
+                    <div class="card-body">
+                      <h5 class="card-title"><i class="bi bi-graph-up text-info me-2"></i>Mide tu progreso</h5>
+                      <p class="card-text">Registra tus avances para mantener la motivación.</p>
+                    </div>
+                  </div>
+                  <div class="card border-0 bg-light mb-3">
+                    <div class="card-body">
+                      <h5 class="card-title"><i class="bi bi-people text-warning me-2"></i>Busca apoyo</h5>
+                      <p class="card-text">Comparte tus objetivos con amigos o únete a una comunidad.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+ <!-- Contenido específico de la página aquí -->
+  {% endblock %}

@@ -1,0 +1,560 @@
+{% extends "base.html" %}
+{% block title %}Nueva Rutina - Healthy Life{% endblock %}
+{% block content %}
+<style>
+  .form-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+  }
+  .step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .step-indicator::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #e9ecef;
+    z-index: 1;
+  }
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+  .step-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  .step.active .step-number {
+    background-color: #198754;
+    color: white;
+  }
+  .step-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+  }
+  .step.active .step-label {
+    color: #198754;
+    font-weight: 500;
+  }
+  .exercise-option {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .exercise-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .exercise-option.selected {
+    border-color: #198754 !important;
+    background-color: rgba(25, 135, 84, 0.05);
+  }
+  .exercise-item {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #f8f9fa;
+  }
+</style>
+
+<div class="text-center mb-4">
+  <h1 class="display-5 fw-bold text-success">Crear Nueva Rutina</h1>
+  <p class="lead text-muted">Diseña tu plan de entrenamiento personalizado</p>
+</div>
+
+<!-- Indicador de Pasos -->
+<div class="step-indicator">
+  <div class="step active" id="step1">
+    <div class="step-number">1</div>
+    <div class="step-label">Información Básica</div>
+  </div>
+  <div class="step" id="step2">
+    <div class="step-number">2</div>
+    <div class="step-label">Ejercicios</div>
+  </div>
+  <div class="step" id="step3">
+    <div class="step-number">3</div>
+    <div class="step-label">Configuración</div>
+  </div>
+  <div class="step" id="step4">
+    <div class="step-number">4</div>
+    <div class="step-label">Revisar</div>
+  </div>
+</div>
+
+<form id="formRutina">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Paso 1: Información Básica -->
+      <div class="form-section" id="section1">
+        <h4 class="mb-4"><i class="bi bi-info-circle text-primary me-2"></i>Información Básica</h4>
+        
+        <div class="mb-3">
+          <label for="routineName" class="form-label fw-medium">Nombre de la Rutina *</label>
+          <input type="text" class="form-control form-control-lg" id="routineName" 
+                 placeholder="Ej: Rutina de Fuerza para Principiantes" required>
+          <div class="invalid-feedback">Por favor ingresa un nombre para la rutina.</div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="routineDuration" class="form-label fw-medium">Duración (minutos) *</label>
+            <input type="number" class="form-control" id="routineDuration" 
+                   placeholder="Ej: 45" min="5" max="180" required>
+            <div class="invalid-feedback">La duración debe ser entre 5 y 180 minutos.</div>
+          </div>
+          <div class="col-md-6">
+            <label for="routineFrequency" class="form-label fw-medium">Frecuencia semanal</label>
+            <select class="form-select" id="routineFrequency">
+              <option value="" selected>Seleccionar frecuencia</option>
+              <option value="1">1 vez por semana</option>
+              <option value="2">2 veces por semana</option>
+              <option value="3">3 veces por semana</option>
+              <option value="4">4 veces por semana</option>
+              <option value="5">5 veces por semana</option>
+              <option value="6">6 veces por semana</option>
+              <option value="7">Diario</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="routineDescription" class="form-label fw-medium">Descripción</label>
+          <textarea class="form-control" id="routineDescription" rows="3" 
+                    placeholder="Describe los objetivos y características de esta rutina..."></textarea>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Cancelar
+          </a>
+          <button type="button" class="btn btn-primary" onclick="siguientePaso(2)">
+            Siguiente <i class="bi bi-arrow-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Paso 2: Tipo de Ejercicio -->
+      <div class="form-section" id="section2" style="display: none;">
+        <h4 class="mb-4"><i class="bi bi-activity text-warning me-2"></i>Tipo de Ejercicio</h4>
+        
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarTipo('fuerza')">
+              <input class="form-check-input" type="radio" name="exerciseType" id="typeStrength" value="fuerza" required>
+              <label class="form-check-label fw-medium" for="typeStrength">
+                <i class="bi bi-dumbbell display-6 text-primary mb-2 d-block"></i>
+                Fuerza
+              </label>
+              <small class="text-muted">Desarrollo muscular y potencia</small>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarTipo('cardio')">
+              <input class="form-check-input" type="radio" name="exerciseType" id="typeCardio" value="cardio" required>
+              <label class="form-check-label fw-medium" for="typeCardio">
+                <i class="bi bi-heart-pulse display-6 text-danger mb-2 d-block"></i>
+                Cardio
+              </label>
+              <small class="text-muted">Resistencia y salud cardiovascular</small>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarTipo('velocidad')">
+              <input class="form-check-input" type="radio" name="exerciseType" id="typeSpeed" value="velocidad" required>
+              <label class="form-check-label fw-medium" for="typeSpeed">
+                <i class="bi bi-lightning-charge display-6 text-warning mb-2 d-block"></i>
+                Velocidad
+              </label>
+              <small class="text-muted">Agilidad y velocidad</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nivel de Dificultad -->
+        <h5 class="mb-3">Nivel de Dificultad</h5>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarNivel('Principiante')">
+              <input class="form-check-input" type="radio" name="difficultyLevel" id="levelBeginner" value="Principiante" required>
+              <label class="form-check-label fw-medium" for="levelBeginner">
+                <i class="bi bi-arrow-up-right display-6 text-success mb-2 d-block"></i>
+                Principiante
+              </label>
+              <small class="text-muted">Ideal para empezar</small>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarNivel('Intermedio')">
+              <input class="form-check-input" type="radio" name="difficultyLevel" id="levelIntermediate" value="Intermedio" required>
+              <label class="form-check-label fw-medium" for="levelIntermediate">
+                <i class="bi bi-arrow-right display-6 text-warning mb-2 d-block"></i>
+                Intermedio
+              </label>
+              <small class="text-muted">Experiencia moderada</small>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarNivel('Avanzado')">
+              <input class="form-check-input" type="radio" name="difficultyLevel" id="levelAdvanced" value="Avanzado" required>
+              <label class="form-check-label fw-medium" for="levelAdvanced">
+                <i class="bi bi-arrow-up display-6 text-danger mb-2 d-block"></i>
+                Avanzado
+              </label>
+              <small class="text-muted">Para usuarios experimentados</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button type="button" class="btn btn-outline-secondary" onclick="siguientePaso(1)">
+            <i class="bi bi-arrow-left me-1"></i>Anterior
+          </button>
+          <button type="button" class="btn btn-primary" onclick="siguientePaso(3)">
+            Siguiente <i class="bi bi-arrow-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Paso 3: Ejercicios -->
+      <div class="form-section" id="section3" style="display: none;">
+        <h4 class="mb-4"><i class="bi bi-list-check text-success me-2"></i>Ejercicios</h4>
+        
+        <div class="mb-3">
+          <label class="form-label fw-medium">Agregar Ejercicios *</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="nuevoEjercicio" placeholder="Ej: Press de banca 4x10">
+            <button type="button" class="btn btn-success" onclick="agregarEjercicio()">
+              <i class="bi bi-plus-lg"></i> Agregar
+            </button>
+          </div>
+          <div class="form-text">Agrega al menos un ejercicio para continuar</div>
+        </div>
+
+        <div id="listaEjercicios" class="mb-4">
+          <div class="text-center text-muted py-3">
+            <i class="bi bi-info-circle me-2"></i>No hay ejercicios agregados
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button type="button" class="btn btn-outline-secondary" onclick="siguientePaso(2)">
+            <i class="bi bi-arrow-left me-1"></i>Anterior
+          </button>
+          <button type="button" class="btn btn-primary" onclick="siguientePaso(4)">
+            Siguiente <i class="bi bi-arrow-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Paso 4: Revisar y Guardar -->
+      <div class="form-section" id="section4" style="display: none;">
+        <h4 class="mb-4"><i class="bi bi-check-circle text-success me-2"></i>Revisar y Guardar</h4>
+        
+        <div class="card bg-light border-0 mb-4">
+          <div class="card-body">
+            <h5 id="resumenNombre" class="text-success">Nombre de la Rutina</h5>
+            <p id="resumenDescripcion" class="text-muted mb-2">Descripción</p>
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>Tipo:</strong> <span id="resumenTipo" class="badge bg-primary">-</span></p>
+                <p><strong>Nivel:</strong> <span id="resumenNivel" class="badge bg-warning">-</span></p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>Duración:</strong> <span id="resumenDuracion">-</span> minutos</p>
+                <p><strong>Ejercicios:</strong> <span id="resumenCantidadEjercicios">0</span></p>
+              </div>
+            </div>
+            <div id="resumenEjercicios" class="mt-3">
+              <strong>Lista de Ejercicios:</strong>
+              <ul id="listaResumenEjercicios" class="mt-2"></ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <button type="button" class="btn btn-outline-secondary" onclick="siguientePaso(3)">
+            <i class="bi bi-arrow-left me-1"></i>Anterior
+          </button>
+          <button type="button" class="btn btn-success" onclick="guardarRutina()">
+            <i class="bi bi-check-lg me-1"></i>Guardar Rutina
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- Modal de Éxito -->
+<div class="modal fade" id="modalExito" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-success"><i class="bi bi-check-circle me-2"></i>¡Éxito!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="mensajeExito">La rutina ha sido guardada correctamente.</p>
+      </div>
+      <div class="modal-footer">
+        <a href="{{ url_for('historial_rutinas') }}" class="btn btn-success">
+          <i class="bi bi-clock-history me-1"></i>Ver en Historial
+        </a>
+        <a href="{{ url_for('nuevo') }}" class="btn btn-outline-primary">
+          <i class="bi bi-plus-circle me-1"></i>Crear Otra
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let ejercicios = [];
+let pasoActual = 1;
+
+function siguientePaso(nuevoPaso) {
+  if (nuevoPaso > pasoActual && !validarPasoActual()) {
+    return;
+  }
+
+  document.getElementById(`section${pasoActual}`).style.display = 'none';
+  document.getElementById(`step${pasoActual}`).classList.remove('active');
+
+  document.getElementById(`section${nuevoPaso}`).style.display = 'block';
+  document.getElementById(`step${nuevoPaso}`).classList.add('active');
+
+  pasoActual = nuevoPaso;
+
+  if (nuevoPaso === 4) {
+    actualizarResumen();
+  }
+}
+
+function validarPasoActual() {
+  switch(pasoActual) {
+    case 1:
+      const nombre = document.getElementById('routineName').value;
+      const duracion = document.getElementById('routineDuration').value;
+      
+      if (!nombre.trim()) {
+        mostrarError('Por favor ingresa un nombre para la rutina.');
+        return false;
+      }
+      
+      if (!duracion || duracion < 5 || duracion > 180) {
+        mostrarError('La duración debe ser entre 5 y 180 minutos.');
+        return false;
+      }
+      
+      return true;
+      
+    case 2:
+      const tipoSeleccionado = document.querySelector('input[name="exerciseType"]:checked');
+      const nivelSeleccionado = document.querySelector('input[name="difficultyLevel"]:checked');
+      
+      if (!tipoSeleccionado) {
+        mostrarError('Por favor selecciona un tipo de ejercicio.');
+        return false;
+      }
+      
+      if (!nivelSeleccionado) {
+        mostrarError('Por favor selecciona un nivel de dificultad.');
+        return false;
+      }
+      
+      return true;
+      
+    case 3:
+      if (ejercicios.length === 0) {
+        mostrarError('Por favor agrega al menos un ejercicio.');
+        return false;
+      }
+      return true;
+      
+    default:
+      return true;
+  }
+}
+
+function mostrarError(mensaje) {
+  const alerta = document.createElement('div');
+  alerta.className = 'alert alert-warning alert-dismissible fade show position-fixed';
+  alerta.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+  alerta.innerHTML = `
+    ${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  
+  document.body.appendChild(alerta);
+  
+  setTimeout(() => {
+    if (alerta.parentNode) alerta.remove();
+  }, 4000);
+}
+
+function seleccionarTipo(tipo) {
+  document.querySelectorAll('.exercise-option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  event.currentTarget.classList.add('selected');
+}
+
+function seleccionarNivel(nivel) {
+  document.querySelectorAll('.exercise-option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  event.currentTarget.classList.add('selected');
+}
+
+function agregarEjercicio() {
+  const input = document.getElementById('nuevoEjercicio');
+  const ejercicio = input.value.trim();
+  
+  if (ejercicio) {
+    ejercicios.push(ejercicio);
+    actualizarListaEjercicios();
+    input.value = '';
+    input.focus();
+  }
+}
+
+function eliminarEjercicio(index) {
+  ejercicios.splice(index, 1);
+  actualizarListaEjercicios();
+}
+
+function actualizarListaEjercicios() {
+  const lista = document.getElementById('listaEjercicios');
+  lista.innerHTML = '';
+  
+  if (ejercicios.length === 0) {
+    lista.innerHTML = `
+      <div class="text-center text-muted py-3">
+        <i class="bi bi-info-circle me-2"></i>No hay ejercicios agregados
+      </div>
+    `;
+    return;
+  }
+  
+  ejercicios.forEach((ejercicio, index) => {
+    const ejercicioHTML = `
+      <div class="exercise-item">
+        <div class="d-flex justify-content-between align-items-center">
+          <span>${ejercicio}</span>
+          <button type="button" class="btn btn-outline-danger btn-sm" onclick="eliminarEjercicio(${index})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    lista.innerHTML += ejercicioHTML;
+  });
+}
+
+function actualizarResumen() {
+  document.getElementById('resumenNombre').textContent = document.getElementById('routineName').value;
+  document.getElementById('resumenDescripcion').textContent = document.getElementById('routineDescription').value || 'Sin descripción';
+  
+  const tipoSeleccionado = document.querySelector('input[name="exerciseType"]:checked');
+  const nivelSeleccionado = document.querySelector('input[name="difficultyLevel"]:checked');
+  
+  document.getElementById('resumenTipo').textContent = tipoSeleccionado ? tipoSeleccionado.value : '-';
+  document.getElementById('resumenNivel').textContent = nivelSeleccionado ? nivelSeleccionado.value : '-';
+  document.getElementById('resumenDuracion').textContent = document.getElementById('routineDuration').value;
+  document.getElementById('resumenCantidadEjercicios').textContent = ejercicios.length;
+  
+  const listaResumen = document.getElementById('listaResumenEjercicios');
+  listaResumen.innerHTML = '';
+  ejercicios.forEach(ejercicio => {
+    const li = document.createElement('li');
+    li.textContent = ejercicio;
+    listaResumen.appendChild(li);
+  });
+}
+
+function guardarRutina() {
+  if (!validarPasoActual()) {
+    return;
+  }
+
+  // Obtener datos del formulario
+  const nombre = document.getElementById('routineName').value;
+  const descripcion = document.getElementById('routineDescription').value;
+  const tipo = document.querySelector('input[name="exerciseType"]:checked').value;
+  const nivel = document.querySelector('input[name="difficultyLevel"]:checked').value;
+  const duracion = document.getElementById('routineDuration').value;
+
+  // Crear objeto rutina
+  const rutina = {
+    id: Date.now(),
+    nombre: nombre,
+    descripcion: descripcion,
+    tipo: tipo,
+    nivel: nivel,
+    duracion: parseInt(duracion),
+    ejercicios: ejercicios,
+    estado: 'pendiente',
+    fecha: new Date().toLocaleDateString('es-ES', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  };
+
+  // Guardar en localStorage
+  let rutinas = JSON.parse(localStorage.getItem('rutinas_healthy_life')) || [];
+  rutinas.unshift(rutina);
+  localStorage.setItem('rutinas_healthy_life', JSON.stringify(rutinas));
+
+  // Mostrar mensaje de éxito
+  document.getElementById('mensajeExito').textContent = `Rutina "${nombre}" creada correctamente.`;
+  const modal = new bootstrap.Modal(document.getElementById('modalExito'));
+  modal.show();
+
+  // Resetear formulario
+  setTimeout(() => {
+    document.getElementById('formRutina').reset();
+    ejercicios = [];
+    pasoActual = 1;
+    document.querySelectorAll('.form-section').forEach(section => {
+      section.style.display = 'none';
+    });
+    document.querySelectorAll('.step').forEach(step => {
+      step.classList.remove('active');
+    });
+    document.getElementById('section1').style.display = 'block';
+    document.getElementById('step1').classList.add('active');
+    actualizarListaEjercicios();
+  }, 2000);
+}
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', function() {
+  actualizarListaEjercicios();
+});
+</script>
+{% endblock %}
