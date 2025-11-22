@@ -93,10 +93,6 @@
   </div>
   <div class="step" id="step3">
     <div class="step-number">3</div>
-    <div class="step-label">Configuración</div>
-  </div>
-  <div class="step" id="step4">
-    <div class="step-number">4</div>
     <div class="step-label">Revisar</div>
   </div>
 </div>
@@ -123,16 +119,13 @@
             <div class="invalid-feedback">La duración debe ser entre 5 y 180 minutos.</div>
           </div>
           <div class="col-md-6">
-            <label for="routineFrequency" class="form-label fw-medium">Frecuencia semanal</label>
-            <select class="form-select" id="routineFrequency">
-              <option value="" selected>Seleccionar frecuencia</option>
-              <option value="1">1 vez por semana</option>
-              <option value="2">2 veces por semana</option>
-              <option value="3">3 veces por semana</option>
-              <option value="4">4 veces por semana</option>
-              <option value="5">5 veces por semana</option>
-              <option value="6">6 veces por semana</option>
-              <option value="7">Diario</option>
+            <label for="routineType" class="form-label fw-medium">Tipo de Rutina *</label>
+            <select class="form-select" id="routineType" required>
+              <option value="">Seleccionar tipo</option>
+              <option value="fuerza">Fuerza</option>
+              <option value="cardio">Cardio</option>
+              <option value="velocidad">Velocidad</option>
+              <option value="flexibilidad">Flexibilidad</option>
             </select>
           </div>
         </div>
@@ -153,90 +146,8 @@
         </div>
       </div>
 
-      <!-- Paso 2: Tipo de Ejercicio -->
+      <!-- Paso 2: Ejercicios -->
       <div class="form-section" id="section2" style="display: none;">
-        <h4 class="mb-4"><i class="bi bi-activity text-warning me-2"></i>Tipo de Ejercicio</h4>
-        
-        <div class="row g-3 mb-4">
-          <div class="col-md-4">
-            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarTipo('fuerza')">
-              <input class="form-check-input" type="radio" name="exerciseType" id="typeStrength" value="fuerza" required>
-              <label class="form-check-label fw-medium" for="typeStrength">
-                <i class="bi bi-dumbbell display-6 text-primary mb-2 d-block"></i>
-                Fuerza
-              </label>
-              <small class="text-muted">Desarrollo muscular y potencia</small>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarTipo('cardio')">
-              <input class="form-check-input" type="radio" name="exerciseType" id="typeCardio" value="cardio" required>
-              <label class="form-check-label fw-medium" for="typeCardio">
-                <i class="bi bi-heart-pulse display-6 text-danger mb-2 d-block"></i>
-                Cardio
-              </label>
-              <small class="text-muted">Resistencia y salud cardiovascular</small>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarTipo('velocidad')">
-              <input class="form-check-input" type="radio" name="exerciseType" id="typeSpeed" value="velocidad" required>
-              <label class="form-check-label fw-medium" for="typeSpeed">
-                <i class="bi bi-lightning-charge display-6 text-warning mb-2 d-block"></i>
-                Velocidad
-              </label>
-              <small class="text-muted">Agilidad y velocidad</small>
-            </div>
-          </div>
-        </div>
-
-        <!-- Nivel de Dificultad -->
-        <h5 class="mb-3">Nivel de Dificultad</h5>
-        <div class="row g-3">
-          <div class="col-md-4">
-            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarNivel('Principiante')">
-              <input class="form-check-input" type="radio" name="difficultyLevel" id="levelBeginner" value="Principiante" required>
-              <label class="form-check-label fw-medium" for="levelBeginner">
-                <i class="bi bi-arrow-up-right display-6 text-success mb-2 d-block"></i>
-                Principiante
-              </label>
-              <small class="text-muted">Ideal para empezar</small>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarNivel('Intermedio')">
-              <input class="form-check-input" type="radio" name="difficultyLevel" id="levelIntermediate" value="Intermedio" required>
-              <label class="form-check-label fw-medium" for="levelIntermediate">
-                <i class="bi bi-arrow-right display-6 text-warning mb-2 d-block"></i>
-                Intermedio
-              </label>
-              <small class="text-muted">Experiencia moderada</small>
-            </div>
-          </div>
-          <div class="col-md-4">
-            <div class="form-check card p-3 h-100 border exercise-option" onclick="seleccionarNivel('Avanzado')">
-              <input class="form-check-input" type="radio" name="difficultyLevel" id="levelAdvanced" value="Avanzado" required>
-              <label class="form-check-label fw-medium" for="levelAdvanced">
-                <i class="bi bi-arrow-up display-6 text-danger mb-2 d-block"></i>
-                Avanzado
-              </label>
-              <small class="text-muted">Para usuarios experimentados</small>
-            </div>
-          </div>
-        </div>
-
-        <div class="d-flex justify-content-between mt-4">
-          <button type="button" class="btn btn-outline-secondary" onclick="siguientePaso(1)">
-            <i class="bi bi-arrow-left me-1"></i>Anterior
-          </button>
-          <button type="button" class="btn btn-primary" onclick="siguientePaso(3)">
-            Siguiente <i class="bi bi-arrow-right ms-1"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Paso 3: Ejercicios -->
-      <div class="form-section" id="section3" style="display: none;">
         <h4 class="mb-4"><i class="bi bi-list-check text-success me-2"></i>Ejercicios</h4>
         
         <div class="mb-3">
@@ -257,17 +168,17 @@
         </div>
 
         <div class="d-flex justify-content-between mt-4">
-          <button type="button" class="btn btn-outline-secondary" onclick="siguientePaso(2)">
+          <button type="button" class="btn btn-outline-secondary" onclick="siguientePaso(1)">
             <i class="bi bi-arrow-left me-1"></i>Anterior
           </button>
-          <button type="button" class="btn btn-primary" onclick="siguientePaso(4)">
+          <button type="button" class="btn btn-primary" onclick="siguientePaso(3)">
             Siguiente <i class="bi bi-arrow-right ms-1"></i>
           </button>
         </div>
       </div>
 
-      <!-- Paso 4: Revisar y Guardar -->
-      <div class="form-section" id="section4" style="display: none;">
+      <!-- Paso 3: Revisar y Guardar -->
+      <div class="form-section" id="section3" style="display: none;">
         <h4 class="mb-4"><i class="bi bi-check-circle text-success me-2"></i>Revisar y Guardar</h4>
         
         <div class="card bg-light border-0 mb-4">
@@ -277,10 +188,9 @@
             <div class="row">
               <div class="col-md-6">
                 <p><strong>Tipo:</strong> <span id="resumenTipo" class="badge bg-primary">-</span></p>
-                <p><strong>Nivel:</strong> <span id="resumenNivel" class="badge bg-warning">-</span></p>
+                <p><strong>Duración:</strong> <span id="resumenDuracion">-</span> minutos</p>
               </div>
               <div class="col-md-6">
-                <p><strong>Duración:</strong> <span id="resumenDuracion">-</span> minutos</p>
                 <p><strong>Ejercicios:</strong> <span id="resumenCantidadEjercicios">0</span></p>
               </div>
             </div>
@@ -292,7 +202,7 @@
         </div>
 
         <div class="d-flex justify-content-between mt-4">
-          <button type="button" class="btn btn-outline-secondary" onclick="siguientePaso(3)">
+          <button type="button" class="btn btn-outline-secondary" onclick="siguientePaso(2)">
             <i class="bi bi-arrow-left me-1"></i>Anterior
           </button>
           <button type="button" class="btn btn-success" onclick="guardarRutina()">
@@ -347,7 +257,7 @@ function siguientePaso(nuevoPaso) {
 
   pasoActual = nuevoPaso;
 
-  if (nuevoPaso === 4) {
+  if (nuevoPaso === 3) {
     actualizarResumen();
   }
 }
@@ -357,6 +267,7 @@ function validarPasoActual() {
     case 1:
       const nombre = document.getElementById('routineName').value;
       const duracion = document.getElementById('routineDuration').value;
+      const tipo = document.getElementById('routineType').value;
       
       if (!nombre.trim()) {
         mostrarError('Por favor ingresa un nombre para la rutina.');
@@ -368,25 +279,14 @@ function validarPasoActual() {
         return false;
       }
       
+      if (!tipo) {
+        mostrarError('Por favor selecciona un tipo de rutina.');
+        return false;
+      }
+      
       return true;
       
     case 2:
-      const tipoSeleccionado = document.querySelector('input[name="exerciseType"]:checked');
-      const nivelSeleccionado = document.querySelector('input[name="difficultyLevel"]:checked');
-      
-      if (!tipoSeleccionado) {
-        mostrarError('Por favor selecciona un tipo de ejercicio.');
-        return false;
-      }
-      
-      if (!nivelSeleccionado) {
-        mostrarError('Por favor selecciona un nivel de dificultad.');
-        return false;
-      }
-      
-      return true;
-      
-    case 3:
       if (ejercicios.length === 0) {
         mostrarError('Por favor agrega al menos un ejercicio.');
         return false;
@@ -412,20 +312,6 @@ function mostrarError(mensaje) {
   setTimeout(() => {
     if (alerta.parentNode) alerta.remove();
   }, 4000);
-}
-
-function seleccionarTipo(tipo) {
-  document.querySelectorAll('.exercise-option').forEach(opt => {
-    opt.classList.remove('selected');
-  });
-  event.currentTarget.classList.add('selected');
-}
-
-function seleccionarNivel(nivel) {
-  document.querySelectorAll('.exercise-option').forEach(opt => {
-    opt.classList.remove('selected');
-  });
-  event.currentTarget.classList.add('selected');
 }
 
 function agregarEjercicio() {
@@ -476,12 +362,7 @@ function actualizarListaEjercicios() {
 function actualizarResumen() {
   document.getElementById('resumenNombre').textContent = document.getElementById('routineName').value;
   document.getElementById('resumenDescripcion').textContent = document.getElementById('routineDescription').value || 'Sin descripción';
-  
-  const tipoSeleccionado = document.querySelector('input[name="exerciseType"]:checked');
-  const nivelSeleccionado = document.querySelector('input[name="difficultyLevel"]:checked');
-  
-  document.getElementById('resumenTipo').textContent = tipoSeleccionado ? tipoSeleccionado.value : '-';
-  document.getElementById('resumenNivel').textContent = nivelSeleccionado ? nivelSeleccionado.value : '-';
+  document.getElementById('resumenTipo').textContent = document.getElementById('routineType').value;
   document.getElementById('resumenDuracion').textContent = document.getElementById('routineDuration').value;
   document.getElementById('resumenCantidadEjercicios').textContent = ejercicios.length;
   
@@ -502,54 +383,57 @@ function guardarRutina() {
   // Obtener datos del formulario
   const nombre = document.getElementById('routineName').value;
   const descripcion = document.getElementById('routineDescription').value;
-  const tipo = document.querySelector('input[name="exerciseType"]:checked').value;
-  const nivel = document.querySelector('input[name="difficultyLevel"]:checked').value;
+  const tipo = document.getElementById('routineType').value;
   const duracion = document.getElementById('routineDuration').value;
 
   // Crear objeto rutina
   const rutina = {
-    id: Date.now(),
     nombre: nombre,
     descripcion: descripcion,
     tipo: tipo,
-    nivel: nivel,
     duracion: parseInt(duracion),
-    ejercicios: ejercicios,
-    estado: 'pendiente',
-    fecha: new Date().toLocaleDateString('es-ES', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    ejercicios: ejercicios
   };
 
-  // Guardar en localStorage
-  let rutinas = JSON.parse(localStorage.getItem('rutinas_healthy_life')) || [];
-  rutinas.unshift(rutina);
-  localStorage.setItem('rutinas_healthy_life', JSON.stringify(rutinas));
+  // Enviar al backend
+  fetch('/rutina/guardar', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(rutina)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Mostrar mensaje de éxito
+      document.getElementById('mensajeExito').textContent = data.message;
+      const modal = new bootstrap.Modal(document.getElementById('modalExito'));
+      modal.show();
 
-  // Mostrar mensaje de éxito
-  document.getElementById('mensajeExito').textContent = `Rutina "${nombre}" creada correctamente.`;
-  const modal = new bootstrap.Modal(document.getElementById('modalExito'));
-  modal.show();
-
-  // Resetear formulario
-  setTimeout(() => {
-    document.getElementById('formRutina').reset();
-    ejercicios = [];
-    pasoActual = 1;
-    document.querySelectorAll('.form-section').forEach(section => {
-      section.style.display = 'none';
-    });
-    document.querySelectorAll('.step').forEach(step => {
-      step.classList.remove('active');
-    });
-    document.getElementById('section1').style.display = 'block';
-    document.getElementById('step1').classList.add('active');
-    actualizarListaEjercicios();
-  }, 2000);
+      // Resetear formulario
+      setTimeout(() => {
+        document.getElementById('formRutina').reset();
+        ejercicios = [];
+        pasoActual = 1;
+        document.querySelectorAll('.form-section').forEach(section => {
+          section.style.display = 'none';
+        });
+        document.querySelectorAll('.step').forEach(step => {
+          step.classList.remove('active');
+        });
+        document.getElementById('section1').style.display = 'block';
+        document.getElementById('step1').classList.add('active');
+        actualizarListaEjercicios();
+      }, 2000);
+    } else {
+      mostrarError(data.message);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    mostrarError('Error al guardar la rutina');
+  });
 }
 
 // Inicializar
