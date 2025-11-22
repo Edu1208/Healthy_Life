@@ -11,44 +11,13 @@
         </div>
       </div>
       <div class="col">
-        <h1 class="h3 mb-1" id="nombreUsuario">User351</h1>
-        <p class="mb-0 opacity-75">ID: <span id="idUsuario">91736482901</span></p>
+        <h1 class="h3 mb-1" id="nombreUsuario">Cargando...</h1>
+        <p class="mb-0 opacity-75">ID: <span id="idUsuario">-</span></p>
       </div>
       <div class="col-auto">
         <button class="btn btn-light btn-sm" onclick="editarPerfil()">
           <i class="bi bi-pencil me-1"></i>Editar
         </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Estadísticas Principales -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-4">
-      <div class="stats-card bg-white p-3 text-center">
-        <div class="text-warning mb-2">
-          <i class="bi bi-fire fs-1"></i>
-        </div>
-        <h4 class="text-warning mb-1" id="rachaPerfil">0</h4>
-        <p class="text-muted mb-0">Racha Actual</p>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="stats-card bg-white p-3 text-center">
-        <div class="text-primary mb-2">
-          <i class="bi bi-dumbbell fs-1"></i>
-        </div>
-        <h4 class="text-primary mb-1" id="especialidadPerfil">Fuerza</h4>
-        <p class="text-muted mb-0">Especialidad</p>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="stats-card bg-white p-3 text-center">
-        <div class="text-success mb-2">
-          <i class="bi bi-calendar-check fs-1"></i>
-        </div>
-        <h4 class="text-success mb-1" id="fechaRegistro">17/10/2025</h4>
-        <p class="text-muted mb-0">Cuenta Creada</p>
       </div>
     </div>
   </div>
@@ -65,44 +34,13 @@
         </div>
         <div class="card-body">
           <p class="card-text" id="descripcionPerfil">
-            Apasionado del fitness y el desarrollo personal. Me especializo en entrenamiento de fuerza 
-            y me encanta superar mis límites cada día. Mi objetivo es mantener una vida saludable 
-            mientras ayudo a otros en su journey fitness.
+            Cargando información del perfil...
           </p>
-          <div class="mt-3" id="etiquetasPerfil">
-            <span class="badge bg-primary me-2">#Fuerza</span>
-            <span class="badge bg-success me-2">#Consistencia</span>
-            <span class="badge bg-warning me-2">#Salud</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Logros Recientes -->
-      <div class="card stats-card">
-        <div class="card-header bg-white border-0">
-          <h5 class="card-title mb-0">
-            <i class="bi bi-trophy text-warning me-2"></i>Logros Recientes
-          </h5>
-        </div>
-        <div class="card-body" id="listaLogros">
-          <!-- Los logros se cargarán dinámicamente -->
         </div>
       </div>
     </div>
 
     <div class="col-lg-4">
-      <!-- Rutinas Activas -->
-      <div class="card stats-card mb-4">
-        <div class="card-header bg-white border-0">
-          <h5 class="card-title mb-0">
-            <i class="bi bi-list-check text-success me-2"></i>Rutinas Activas
-          </h5>
-        </div>
-        <div class="card-body" id="rutinasActivas">
-          <!-- Las rutinas activas se cargarán dinámicamente -->
-        </div>
-      </div>
-
       <!-- Acciones Rápidas -->
       <div class="card stats-card">
         <div class="card-header bg-white border-0">
@@ -114,9 +52,6 @@
           <div class="d-grid gap-2">
             <button class="btn btn-outline-primary" onclick="editarPerfil()">
               <i class="bi bi-pencil me-2"></i>Editar Perfil
-            </button>
-            <button class="btn btn-outline-success" onclick="compartirProgreso()">
-              <i class="bi bi-share me-2"></i>Compartir Progreso
             </button>
             <button class="btn btn-outline-info" onclick="exportarDatos()">
               <i class="bi bi-download me-2"></i>Exportar Datos
@@ -130,7 +65,7 @@
 
 <!-- Modal para Editar Perfil -->
 <div class="modal fade" id="modalEditarPerfil" tabindex="-1">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Editar Perfil</h5>
@@ -138,33 +73,13 @@
       </div>
       <div class="modal-body">
         <form id="formEditarPerfil">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label">Nombre de usuario</label>
-                <input type="text" class="form-control" id="inputNombreUsuario">
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="mb-3">
-                <label class="form-label">Especialidad</label>
-                <select class="form-select" id="selectEspecialidad">
-                  <option value="Fuerza">Fuerza</option>
-                  <option value="Cardio">Cardio</option>
-                  <option value="Velocidad">Velocidad</option>
-                  <option value="Flexibilidad">Flexibilidad</option>
-                  <option value="General">General</option>
-                </select>
-              </div>
-            </div>
+          <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="inputNombre" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Descripción</label>
             <textarea class="form-control" id="textareaDescripcion" rows="4"></textarea>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Etiquetas (separadas por comas)</label>
-            <input type="text" class="form-control" id="inputEtiquetas" placeholder="Ej: Fuerza, Consistencia, Salud">
           </div>
         </form>
       </div>
@@ -180,203 +95,101 @@
 
 {% block scripts %}
 <script>
-let datosPerfil = JSON.parse(localStorage.getItem('perfil_healthy_life')) || {
-  nombre: 'User351',
-  id: '91736482901',
-  especialidad: 'Fuerza',
-  descripcion: 'Apasionado del fitness y el desarrollo personal. Me especializo en entrenamiento de fuerza y me encanta superar mis límites cada día. Mi objetivo es mantener una vida saludable mientras ayudo a otros en su journey fitness.',
-  etiquetas: ['Fuerza', 'Consistencia', 'Salud'],
-  fechaRegistro: '17/10/2025',
-  logros: [
-    { tipo: 'racha', texto: 'Racha de 30 días completada', fecha: 'Hoy' },
-    { tipo: 'fuerza', texto: 'Nuevo PR en Press de Banca', fecha: 'Hace 2 días' },
-    { tipo: 'cardio', texto: 'Meta de cardio semanal alcanzada', fecha: 'Hace 5 días' }
-  ]
-};
-
 // Cargar datos al iniciar
 document.addEventListener('DOMContentLoaded', function() {
   cargarPerfil();
-  cargarLogros();
-  cargarRutinasActivas();
-  cargarEstadisticas();
 });
 
 function cargarPerfil() {
-  document.getElementById('nombreUsuario').textContent = datosPerfil.nombre;
-  document.getElementById('idUsuario').textContent = datosPerfil.id;
-  document.getElementById('especialidadPerfil').textContent = datosPerfil.especialidad;
-  document.getElementById('descripcionPerfil').textContent = datosPerfil.descripcion;
-  document.getElementById('fechaRegistro').textContent = datosPerfil.fechaRegistro;
-  
-  // Cargar etiquetas
-  const etiquetasContainer = document.getElementById('etiquetasPerfil');
-  etiquetasContainer.innerHTML = '';
-  datosPerfil.etiquetas.forEach(etiqueta => {
-    const badge = document.createElement('span');
-    badge.className = 'badge bg-primary me-2';
-    badge.textContent = '#' + etiqueta;
-    etiquetasContainer.appendChild(badge);
-  });
+  fetch('/perfil/datos')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarPerfil(data.perfil);
+      } else {
+        mostrarMensaje('Error al cargar el perfil', 'danger');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al cargar el perfil', 'danger');
+    });
 }
 
-function cargarLogros() {
-  const listaLogros = document.getElementById('listaLogros');
-  listaLogros.innerHTML = '';
-  
-  datosPerfil.logros.forEach(logro => {
-    const icono = getIconoLogro(logro.tipo);
-    const color = getColorLogro(logro.tipo);
-    
-    const logroHTML = `
-      <div class="d-flex align-items-center mb-3">
-        <div class="${color} bg-opacity-10 p-2 rounded me-3">
-          <i class="${icono} ${color}"></i>
-        </div>
-        <div>
-          <h6 class="mb-1">${logro.texto}</h6>
-          <small class="text-muted">${logro.fecha}</small>
-        </div>
-      </div>
-    `;
-    
-    listaLogros.innerHTML += logroHTML;
-  });
-}
-
-function cargarRutinasActivas() {
-  const rutinasActivas = document.getElementById('rutinasActivas');
-  const rutinas = JSON.parse(localStorage.getItem('rutinas_healthy_life')) || [];
-  
-  const rutinasPendientes = rutinas.filter(r => r.estado === 'pendiente' || r.estado === 'en-progreso').slice(0, 3);
-  
-  if (rutinasPendientes.length === 0) {
-    rutinasActivas.innerHTML = `
-      <div class="text-center text-muted py-3">
-        <i class="bi bi-info-circle me-2"></i>No hay rutinas activas
-        <br>
-        <small><a href="{{ url_for('nuevo') }}">Crear una rutina</a></small>
-      </div>
-    `;
-    return;
-  }
-  
-  rutinasActivas.innerHTML = '';
-  rutinasPendientes.forEach(rutina => {
-    const progreso = Math.floor(Math.random() * 40) + 40; // Progreso simulado entre 40-80%
-    const color = rutina.estado === 'en-progreso' ? 'bg-info' : 'bg-success';
-    
-    const rutinaHTML = `
-      <div class="mb-3">
-        <h6 class="mb-1">${rutina.nombre}</h6>
-        <div class="progress mb-2" style="height: 6px;">
-          <div class="progress-bar ${color}" style="width: ${progreso}%"></div>
-        </div>
-        <small class="text-muted">${progreso}% completado</small>
-      </div>
-    `;
-    
-    rutinasActivas.innerHTML += rutinaHTML;
-  });
-}
-
-function cargarEstadisticas() {
-  // Cargar datos de racha
-  const datosRacha = JSON.parse(localStorage.getItem('racha_healthy_life')) || { diasConsecutivos: 0 };
-  document.getElementById('rachaPerfil').textContent = datosRacha.diasConsecutivos;
+function mostrarPerfil(perfil) {
+  document.getElementById('nombreUsuario').textContent = perfil.nombre || 'Usuario';
+  document.getElementById('idUsuario').textContent = perfil._id || '-';
+  document.getElementById('descripcionPerfil').textContent = perfil.descripcion || 'Sin descripción';
 }
 
 function editarPerfil() {
-  document.getElementById('inputNombreUsuario').value = datosPerfil.nombre;
-  document.getElementById('selectEspecialidad').value = datosPerfil.especialidad;
-  document.getElementById('textareaDescripcion').value = datosPerfil.descripcion;
-  document.getElementById('inputEtiquetas').value = datosPerfil.etiquetas.join(', ');
-  
-  const modal = new bootstrap.Modal(document.getElementById('modalEditarPerfil'));
-  modal.show();
+  fetch('/perfil/datos')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const perfil = data.perfil;
+        document.getElementById('inputNombre').value = perfil.nombre || '';
+        document.getElementById('textareaDescripcion').value = perfil.descripcion || '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('modalEditarPerfil'));
+        modal.show();
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al cargar datos del perfil', 'danger');
+    });
 }
 
 function guardarPerfil() {
-  datosPerfil.nombre = document.getElementById('inputNombreUsuario').value.trim() || datosPerfil.nombre;
-  datosPerfil.especialidad = document.getElementById('selectEspecialidad').value;
-  datosPerfil.descripcion = document.getElementById('textareaDescripcion').value.trim() || datosPerfil.descripcion;
-  
-  const etiquetasInput = document.getElementById('inputEtiquetas').value.trim();
-  if (etiquetasInput) {
-    datosPerfil.etiquetas = etiquetasInput.split(',').map(e => e.trim()).filter(e => e);
-  }
-  
-  localStorage.setItem('perfil_healthy_life', JSON.stringify(datosPerfil));
-  
-  const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarPerfil'));
-  modal.hide();
-  
-  cargarPerfil();
-  mostrarMensaje('Perfil actualizado correctamente', 'success');
-}
+  const nombre = document.getElementById('inputNombre').value.trim();
+  const descripcion = document.getElementById('textareaDescripcion').value.trim();
 
-function compartirProgreso() {
-  const datosRacha = JSON.parse(localStorage.getItem('racha_healthy_life')) || { diasConsecutivos: 0 };
-  const texto = `¡Hola! Soy ${datosPerfil.nombre} y llevo ${datosRacha.diasConsecutivos} días consecutivos entrenando con Healthy Life. Mi especialidad: ${datosPerfil.especialidad}. ¡Únete a mi journey fitness! 💪 #HealthyLife #${datosPerfil.especialidad}`;
-  
-  if (navigator.share) {
-    navigator.share({
-      title: 'Mi Progreso en Healthy Life',
-      text: texto,
-      url: window.location.href
-    });
-  } else {
-    navigator.clipboard.writeText(texto).then(() => {
-      mostrarMensaje('¡Texto copiado al portapapeles! Comparte tu progreso.', 'success');
-    });
-  }
+  fetch('/perfil/editar', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      nombre: nombre,
+      descripcion: descripcion
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarPerfil'));
+      modal.hide();
+      cargarPerfil();
+      mostrarMensaje('Perfil actualizado correctamente', 'success');
+    } else {
+      mostrarMensaje(data.message, 'danger');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    mostrarMensaje('Error al actualizar el perfil', 'danger');
+  });
 }
 
 function exportarDatos() {
-  const datosExportar = {
-    perfil: datosPerfil,
-    racha: JSON.parse(localStorage.getItem('racha_healthy_life') || '{}'),
-    rutinas: JSON.parse(localStorage.getItem('rutinas_healthy_life') || '[]'),
-    notas: JSON.parse(localStorage.getItem('notas_healthy_life') || '[]'),
-    fechaExportacion: new Date().toISOString()
-  };
-  
-  const datosStr = JSON.stringify(datosExportar, null, 2);
-  const blob = new Blob([datosStr], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `healthy_life_datos_${new Date().toISOString().split('T')[0]}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  
-  mostrarMensaje('Datos exportados correctamente', 'success');
-}
-
-// Funciones auxiliares
-function getIconoLogro(tipo) {
-  const iconos = {
-    'racha': 'bi bi-fire',
-    'fuerza': 'bi bi-dumbbell',
-    'cardio': 'bi bi-heart-pulse',
-    'velocidad': 'bi bi-lightning-charge',
-    'general': 'bi bi-trophy'
-  };
-  return iconos[tipo] || 'bi bi-star';
-}
-
-function getColorLogro(tipo) {
-  const colores = {
-    'racha': 'text-warning',
-    'fuerza': 'text-primary',
-    'cardio': 'text-danger',
-    'velocidad': 'text-warning',
-    'general': 'text-success'
-  };
-  return colores[tipo] || 'text-info';
+  fetch('/exportar-datos')
+    .then(response => response.blob())
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'healthy_life_datos.json';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      mostrarMensaje('Datos exportados correctamente', 'success');
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al exportar datos', 'danger');
+    });
 }
 
 function mostrarMensaje(mensaje, tipo) {
@@ -395,4 +208,29 @@ function mostrarMensaje(mensaje, tipo) {
   }, 3000);
 }
 </script>
+
+<style>
+.profile-header {
+  background: linear-gradient(135deg, #198754, #20c997);
+  border-radius: 12px;
+  color: white;
+}
+
+.stats-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.achievement-badge {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+</style>
 {% endblock %}
