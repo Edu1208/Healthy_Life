@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
@@ -48,10 +48,34 @@ def init_db():
 # Ejecutar inicialización
 init_db()
 
+# Funciones de contexto para las plantillas
+@app.context_processor
+def utility_processor():
+    def get_badge_color(tipo):
+        colores = {
+            'fuerza': 'bg-primary',
+            'cardio': 'bg-danger', 
+            'velocidad': 'bg-warning'
+        }
+        return colores.get(tipo, 'bg-secondary')
+    
+    def get_tipo_icono(tipo):
+        iconos = {
+            'fuerza': 'bi bi-dumbbell',
+            'cardio': 'bi bi-heart-pulse',
+            'velocidad': 'bi bi-lightning-charge'
+        }
+        return iconos.get(tipo, 'bi bi-activity')
+    
+    return dict(
+        get_badge_color=get_badge_color,
+        get_tipo_icono=get_tipo_icono
+    )
+
 # Middleware para verificar autenticación
 @app.before_request
 def require_login():
-    allowed_routes = ['index', 'login', 'register', 'ayuda']
+    allowed_routes = ['index', 'login', 'register', 'ayuda', 'static']
     if request.endpoint not in allowed_routes and 'user_id' not in session:
         return redirect(url_for('login'))
 
@@ -214,45 +238,202 @@ def nueva_rutina():
 
     return render_template("nueva_rutina.html")
 
+# Ruta para guardar rutinas desde el formulario nuevo.html
+@app.route("/rutina/guardar", methods=["POST"])
+def guardar_rutina():
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Usuario no autenticado"})
+    
+    try:
+        data = request.get_json()
+        
+        # Crear nueva rutina
+        nueva_rutina = {
+            "usuario_id": ObjectId(session["user_id"]),
+            "nombre": data.get("nombre"),
+            "descripcion": data.get("descripcion"),
+            "tipo": data.get("tipo"),
+            "nivel": data.get("nivel"),
+            "duracion": data.get("duracion"),
+            "ejercicios": data.get("ejercicios", []),
+            "fecha_creacion": datetime.now(),
+            "completada": False,
+            "estado": "pendiente"
+        }
+        
+        # Guardar en la colección de rutinas
+        resultado = db.rutinas.insert_one(nueva_rutina)
+        
+        # También guardar en historial como rutina pendiente
+        historial = {
+            "usuario_id": ObjectId(session["user_id"]),
+            "rutina_id": resultado.inserted_id,
+            "nombre": data.get("nombre"),
+            "descripcion": data.get("descripcion"),
+            "tipo": data.get("tipo"),
+            "nivel": data.get("nivel"),
+            "duracion": data.get("duracion"),
+            "ejercicios": data.get("ejercicios", []),
+            "fecha_creacion": datetime.now(),
+            "estado": "pendiente",
+            "fecha_completada": None
+        }
+        db.historial_rutinas.insert_one(historial)
+        
+        return jsonify({"success": True, "message": "Rutina guardada correctamente"})
+    
+    except Exception as e:
+        print(f"Error al guardar rutina: {e}")
+        return jsonify({"success": False, "message": "Error al guardar la rutina"})
+
+# Ruta para completar rutinas
 @app.route("/rutina/completar/<id>", methods=["POST"])
 def completar_rutina(id):
-    if db is None:
-        flash("Error de conexión con la base de datos.", "danger")
-        return redirect(url_for("rutinas"))
-
-    # Actualizar rutina como completada
-    db.rutinas.update_one(
-        {"_id": ObjectId(id), "usuario_id": ObjectId(session["user_id"])},
-        {"$set": {"completada": True, "fecha_completada": datetime.now()}}
-    )
-
-    # Registrar en historial
-    rutina = db.rutinas.find_one({"_id": ObjectId(id)})
-    historial = {
-        "usuario_id": ObjectId(session["user_id"]),
-        "rutina_id": ObjectId(id),
-        "nombre_rutina": rutina["nombre"],
-        "fecha_completada": datetime.now(),
-        "tipo": rutina.get("tipo", ""),
-        "duracion": rutina.get("duracion", "")
-    }
-    db.historial_rutinas.insert_one(historial)
-
-    # Actualizar racha del usuario
-    usuario = db.usuarios.find_one({"_id": ObjectId(session["user_id"])})
-    nueva_racha = usuario.get("racha_actual", 0) + 1
-    racha_maxima = max(usuario.get("racha_maxima", 0), nueva_racha)
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Usuario no autenticado"})
     
-    db.usuarios.update_one(
-        {"_id": ObjectId(session["user_id"])},
-        {"$set": {
-            "racha_actual": nueva_racha,
-            "racha_maxima": racha_maxima
-        }}
-    )
+    try:
+        # Actualizar rutina como completada
+        db.rutinas.update_one(
+            {"_id": ObjectId(id), "usuario_id": ObjectId(session["user_id"])},
+            {"$set": {"completada": True, "estado": "completada"}}
+        )
+        
+        # Actualizar en historial
+        db.historial_rutinas.update_one(
+            {"rutina_id": ObjectId(id), "usuario_id": ObjectId(session["user_id"])},
+            {"$set": {
+                "estado": "completada",
+                "fecha_completada": datetime.now()
+            }}
+        )
+        
+        # Actualizar racha del usuario
+        usuario = db.usuarios.find_one({"_id": ObjectId(session["user_id"])})
+        nueva_racha = usuario.get("racha_actual", 0) + 1
+        racha_maxima = max(usuario.get("racha_maxima", 0), nueva_racha)
+        
+        db.usuarios.update_one(
+            {"_id": ObjectId(session["user_id"])},
+            {"$set": {
+                "racha_actual": nueva_racha,
+                "racha_maxima": racha_maxima
+            }}
+        )
+        
+        return jsonify({"success": True, "message": "¡Rutina completada! Racha actualizada."})
+    
+    except Exception as e:
+        print(f"Error al completar rutina: {e}")
+        return jsonify({"success": False, "message": "Error al completar la rutina"})
 
-    flash("¡Rutina completada! Racha actualizada.", "success")
-    return redirect(url_for("rutinas"))
+# Ruta para obtener el historial de rutinas
+@app.route("/historial-rutinas")
+def historial_rutinas():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    # Obtener todas las rutinas del usuario (activas y completadas)
+    historial = list(db.historial_rutinas.find(
+        {"usuario_id": ObjectId(session["user_id"])}
+    ).sort("fecha_creacion", -1))
+    
+    # Convertir ObjectId a string para las plantillas
+    for item in historial:
+        item['_id'] = str(item['_id'])
+        item['usuario_id'] = str(item['usuario_id'])
+        if 'rutina_id' in item:
+            item['rutina_id'] = str(item['rutina_id'])
+    
+    return render_template("historial_rutinas.html", historial=historial)
+
+# Ruta para obtener datos del historial en formato JSON
+@app.route("/historial-rutinas-data")
+def historial_rutinas_data():
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Usuario no autenticado"})
+    
+    try:
+        historial = list(db.historial_rutinas.find(
+            {"usuario_id": ObjectId(session["user_id"])}
+        ).sort("fecha_creacion", -1))
+        
+        # Convertir ObjectId a string
+        for item in historial:
+            item['_id'] = str(item['_id'])
+            item['usuario_id'] = str(item['usuario_id'])
+            if 'rutina_id' in item:
+                item['rutina_id'] = str(item['rutina_id'])
+        
+        return jsonify({"success": True, "rutinas": historial})
+    
+    except Exception as e:
+        print(f"Error al obtener historial: {e}")
+        return jsonify({"success": False, "message": "Error al obtener el historial"})
+
+# Ruta para eliminar rutinas del historial
+@app.route("/historial/eliminar/<id>", methods=["POST"])
+def eliminar_historial(id):
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Usuario no autenticado"})
+    
+    try:
+        # Primero obtener el rutina_id para eliminar de ambas colecciones
+        historial_item = db.historial_rutinas.find_one({
+            "_id": ObjectId(id),
+            "usuario_id": ObjectId(session["user_id"])
+        })
+        
+        if historial_item:
+            rutina_id = historial_item.get('rutina_id')
+            
+            # Eliminar de historial_rutinas
+            resultado_historial = db.historial_rutinas.delete_one({
+                "_id": ObjectId(id),
+                "usuario_id": ObjectId(session["user_id"])
+            })
+            
+            # También eliminar de rutinas si existe
+            if rutina_id:
+                db.rutinas.delete_one({
+                    "_id": rutina_id,
+                    "usuario_id": ObjectId(session["user_id"])
+                })
+            
+            if resultado_historial.deleted_count > 0:
+                return jsonify({"success": True, "message": "Rutina eliminada correctamente"})
+            else:
+                return jsonify({"success": False, "message": "No se pudo eliminar la rutina"})
+        else:
+            return jsonify({"success": False, "message": "Rutina no encontrada"})
+    
+    except Exception as e:
+        print(f"Error al eliminar rutina: {e}")
+        return jsonify({"success": False, "message": "Error al eliminar la rutina"})
+
+# Ruta para obtener detalles de una rutina
+@app.route("/rutina/<id>")
+def obtener_rutina(id):
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Usuario no autenticado"})
+    
+    try:
+        rutina = db.rutinas.find_one({
+            "_id": ObjectId(id),
+            "usuario_id": ObjectId(session["user_id"])
+        })
+        
+        if rutina:
+            # Convertir ObjectId a string para JSON
+            rutina['_id'] = str(rutina['_id'])
+            rutina['usuario_id'] = str(rutina['usuario_id'])
+            return jsonify({"success": True, "rutina": rutina})
+        else:
+            return jsonify({"success": False, "message": "Rutina no encontrada"})
+    
+    except Exception as e:
+        print(f"Error al obtener rutina: {e}")
+        return jsonify({"success": False, "message": "Error al obtener la rutina"})
 
 # Gestión de notas
 @app.route("/nota/nueva", methods=["GET", "POST"])
@@ -313,14 +494,6 @@ def eliminar_nota(id):
     db.notas.delete_one({"_id": ObjectId(id), "usuario_id": ObjectId(session["user_id"])})
     flash("Nota eliminada correctamente.", "info")
     return redirect(url_for("notas"))
-
-# Historial de rutinas
-@app.route("/historial-rutinas")
-def historial_rutinas():
-    historial = list(db.historial_rutinas.find(
-        {"usuario_id": ObjectId(session["user_id"])}
-    ).sort("fecha_completada", -1))
-    return render_template("historial_rutinas.html", historial=historial)
 
 # Rutas CRUD originales (mantenidas para compatibilidad)
 @app.route("/list")
