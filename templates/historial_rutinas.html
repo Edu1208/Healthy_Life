@@ -155,137 +155,55 @@
 
 {% block scripts %}
 <script>
-// Datos de ejemplo para las rutinas
-const rutinas = [
-  {
-    id: 1,
-    nombre: "Rutina de Fuerza Avanzada",
-    descripcion: "Enfoque en ejercicios compuestos para desarrollo muscular completo",
-    tipo: "fuerza",
-    nivel: "Avanzado",
-    duracion: 60,
-    fecha: "Hoy, 10:30 AM",
-    estado: "completada",
-    ejercicios: [
-      "Press de banca: 4x8-12",
-      "Sentadillas: 4x8-10", 
-      "Peso muerto: 3x6-8",
-      "Dominadas: 3x8-10",
-      "Press militar: 3x10-12"
-    ]
-  },
-  {
-    id: 2,
-    nombre: "Cardio HIIT Intenso",
-    descripcion: "Entrenamiento por intervalos de alta intensidad para quema de grasa",
-    tipo: "cardio",
-    nivel: "Intermedio",
-    duracion: 45,
-    fecha: "Ayer, 08:15 AM",
-    estado: "completada",
-    ejercicios: [
-      "Burpees: 30 segundos",
-      "Descanso: 15 segundos",
-      "Mountain climbers: 30 segundos",
-      "Descanso: 15 segundos",
-      "Saltos de tijera: 30 segundos",
-      "Descanso: 15 segundos",
-      "Repetir circuito 8 veces"
-    ]
-  },
-  {
-    id: 3,
-    nombre: "Entrenamiento de Velocidad",
-    descripcion: "Sprints y ejercicios de agilidad para mejorar velocidad",
-    tipo: "velocidad",
-    nivel: "Principiante",
-    duracion: 30,
-    fecha: "Programada: Mañana",
-    estado: "pendiente",
-    ejercicios: [
-      "Sprints 50m: 8 repeticiones",
-      "Saltos de caja: 3x10",
-      "Escalera de agilidad: 5 vueltas",
-      "Saltos con rodillas al pecho: 3x15"
-    ]
-  },
-  {
-    id: 4,
-    nombre: "Fuerza Superior",
-    descripcion: "Enfoque en pecho, hombros y espalda",
-    tipo: "fuerza",
-    nivel: "Avanzado",
-    duracion: 75,
-    fecha: "16/10/2025",
-    estado: "completada",
-    ejercicios: [
-      "Press de banca inclinado: 4x8-10",
-      "Remo con barra: 4x8-10",
-      "Press militar: 3x8-12",
-      "Jalón al pecho: 3x10-12",
-      "Elevaciones laterales: 3x12-15"
-    ]
-  },
-  {
-    id: 5,
-    nombre: "Cardio de Resistencia",
-    descripcion: "Entrenamiento continuo para mejorar capacidad aeróbica",
-    tipo: "cardio",
-    nivel: "Principiante",
-    duracion: 40,
-    fecha: "15/10/2025",
-    estado: "completada",
-    ejercicios: [
-      "Trotar: 20 minutos",
-      "Bicicleta estática: 15 minutos",
-      "Caminata rápida: 5 minutos"
-    ]
-  },
-  {
-    id: 6,
-    nombre: "Full Body",
-    descripcion: "Rutina completa para todo el cuerpo",
-    tipo: "fuerza",
-    nivel: "Intermedio",
-    duracion: 55,
-    fecha: "En progreso",
-    estado: "en-progreso",
-    ejercicios: [
-      "Sentadillas: 4x10",
-      "Flexiones: 3x15",
-      "Peso muerto: 3x8",
-      "Fondos: 3x10",
-      "Plancha: 3x60 segundos"
-    ]
-  }
-];
-
-let rutinaSeleccionada = null;
-
-// Cargar rutinas al iniciar
+// Cargar rutinas desde el servidor
 document.addEventListener('DOMContentLoaded', function() {
-  cargarRutinas();
-  actualizarEstadisticas();
+  cargarRutinasDesdeServidor();
 });
 
-function cargarRutinas(filtradas = rutinas) {
+function cargarRutinasDesdeServidor() {
+  fetch('/historial-rutinas-data')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarRutinas(data.rutinas);
+        actualizarEstadisticas(data.rutinas);
+      } else {
+        console.error('Error al cargar rutinas:', data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al cargar las rutinas', 'danger');
+    });
+}
+
+function mostrarRutinas(rutinas) {
   const listaRutinas = document.getElementById('listaRutinas');
   listaRutinas.innerHTML = '';
 
-  if (filtradas.length === 0) {
+  if (rutinas.length === 0) {
     listaRutinas.innerHTML = `
       <div class="col-12 text-center py-5">
         <i class="bi bi-inbox display-1 text-muted"></i>
-        <h4 class="text-muted mt-3">No se encontraron rutinas</h4>
-        <p class="text-muted">No hay rutinas que coincidan con los filtros aplicados.</p>
+        <h4 class="text-muted mt-3">No hay rutinas registradas</h4>
+        <p class="text-muted">Crea tu primera rutina para verla aquí.</p>
+        <a href="{{ url_for('nuevo') }}" class="btn btn-success mt-3">
+          <i class="bi bi-plus-circle me-2"></i>Crear Primera Rutina
+        </a>
       </div>
     `;
     return;
   }
 
-  filtradas.forEach(rutina => {
+  rutinas.forEach(rutina => {
     const badgeColor = getBadgeColor(rutina.tipo);
     const estadoColor = getEstadoColor(rutina.estado);
+    
+    const fechaTexto = rutina.estado === 'completada' && rutina.fecha_completada 
+      ? new Date(rutina.fecha_completada).toLocaleDateString('es-ES')
+      : (rutina.fecha_creacion 
+          ? new Date(rutina.fecha_creacion).toLocaleDateString('es-ES')
+          : 'Fecha no disponible');
     
     const rutinaHTML = `
       <div class="col-12">
@@ -299,11 +217,11 @@ function cargarRutinas(filtradas = rutinas) {
                   </div>
                   <div>
                     <h4 class="card-title mb-1">${rutina.nombre}</h4>
-                    <p class="text-muted mb-2">${rutina.descripcion}</p>
+                    <p class="text-muted mb-2">${rutina.descripcion || 'Sin descripción'}</p>
                     <div class="d-flex gap-2 flex-wrap">
-                      <span class="badge ${badgeColor}">${rutina.tipo.charAt(0).toUpperCase() + rutina.tipo.slice(1)}</span>
-                      <span class="badge bg-warning">${rutina.nivel}</span>
-                      <span class="badge bg-info">${rutina.duracion} min</span>
+                      <span class="badge ${badgeColor}">${rutina.tipo ? rutina.tipo.charAt(0).toUpperCase() + rutina.tipo.slice(1) : 'Sin tipo'}</span>
+                      <span class="badge bg-warning">${rutina.nivel || 'Sin nivel'}</span>
+                      <span class="badge bg-info">${rutina.duracion || 0} min</span>
                     </div>
                   </div>
                 </div>
@@ -313,16 +231,18 @@ function cargarRutinas(filtradas = rutinas) {
                   <span class="badge ${estadoColor} fs-6">${getEstadoTexto(rutina.estado)}</span>
                 </div>
                 <div class="text-muted mb-2">
-                  <i class="bi bi-calendar me-1"></i>${rutina.fecha}
+                  <i class="bi bi-calendar me-1"></i>${fechaTexto}
                 </div>
                 <div class="btn-group">
-                  <button class="btn btn-outline-primary btn-sm" onclick="verRutina(${rutina.id})">
+                  <button class="btn btn-outline-primary btn-sm" onclick="verRutina('${rutina._id}')">
                     <i class="bi bi-eye me-1"></i>Ver
                   </button>
-                  <button class="btn btn-outline-success btn-sm" onclick="repetirRutina(${rutina.id})">
-                    <i class="bi bi-repeat me-1"></i>Repetir
-                  </button>
-                  <button class="btn btn-outline-danger btn-sm" onclick="eliminarRutina(${rutina.id})">
+                  ${rutina.estado !== 'completada' ? `
+                    <button class="btn btn-outline-success btn-sm" onclick="completarRutina('${rutina._id}')">
+                      <i class="bi bi-check-lg me-1"></i>Completar
+                    </button>
+                  ` : ''}
+                  <button class="btn btn-outline-danger btn-sm" onclick="eliminarRutina('${rutina._id}')">
                     <i class="bi bi-trash me-1"></i>Eliminar
                   </button>
                 </div>
@@ -337,65 +257,103 @@ function cargarRutinas(filtradas = rutinas) {
   });
 }
 
-function aplicarFiltros() {
-  const tipo = document.getElementById('filterType').value;
-  const estado = document.getElementById('filterStatus').value;
-  const fechaDesde = document.getElementById('filterDateFrom').value;
-  const fechaHasta = document.getElementById('filterDateTo').value;
-
-  let rutinasFiltradas = rutinas.filter(rutina => {
-    let coincide = true;
-    
-    if (tipo && rutina.tipo !== tipo) coincide = false;
-    if (estado && rutina.estado !== estado) coincide = false;
-    
-    return coincide;
+function completarRutina(id) {
+  fetch(`/rutina/completar/${id}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      mostrarMensaje(data.message, 'success');
+      cargarRutinasDesdeServidor();
+    } else {
+      mostrarMensaje(data.message, 'danger');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    mostrarMensaje('Error al completar la rutina', 'danger');
   });
-
-  cargarRutinas(rutinasFiltradas);
-  actualizarEstadisticas(rutinasFiltradas);
-  
-  // Mostrar mensaje de éxito
-  mostrarMensaje(`Filtros aplicados: ${rutinasFiltradas.length} rutinas encontradas`, 'success');
 }
 
-function limpiarFiltros() {
-  document.getElementById('filterType').value = '';
-  document.getElementById('filterStatus').value = '';
-  document.getElementById('filterDateFrom').value = '';
-  document.getElementById('filterDateTo').value = '';
+function eliminarRutina(id) {
+  document.getElementById('modalConfirmacionTexto').textContent = 
+    '¿Estás seguro de que quieres eliminar esta rutina? Esta acción no se puede deshacer.';
   
-  cargarRutinas();
-  actualizarEstadisticas();
+  const btnConfirmar = document.getElementById('btnConfirmarAccion');
+  btnConfirmar.onclick = function() {
+    fetch(`/historial/eliminar/${id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarMensaje(data.message, 'success');
+        cargarRutinasDesdeServidor();
+      } else {
+        mostrarMensaje(data.message, 'danger');
+      }
+      
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmacion'));
+      modal.hide();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al eliminar la rutina', 'danger');
+    });
+  };
   
-  mostrarMensaje('Filtros limpiados correctamente', 'info');
+  const modal = new bootstrap.Modal(document.getElementById('modalConfirmacion'));
+  modal.show();
 }
 
+// Las demás funciones permanecen igual...
 function verRutina(id) {
-  const rutina = rutinas.find(r => r.id === id);
-  rutinaSeleccionada = rutina;
-  
+  fetch(`/rutina/${id}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarModalRutina(data.rutina);
+      } else {
+        mostrarMensaje(data.message, 'danger');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al cargar la rutina', 'danger');
+    });
+}
+
+function mostrarModalRutina(rutina) {
   const modalTitulo = document.getElementById('modalTitulo');
   const modalContenido = document.getElementById('modalContenido');
   
   modalTitulo.textContent = rutina.nombre;
   
-  const ejerciciosHTML = rutina.ejercicios.map(ej => `<li class="list-group-item">${ej}</li>`).join('');
+  const ejerciciosHTML = rutina.ejercicios && rutina.ejercicios.length > 0 
+    ? rutina.ejercicios.map(ej => `<li class="list-group-item">${ej}</li>`).join('')
+    : '<li class="list-group-item text-muted">No hay ejercicios registrados</li>';
   
   modalContenido.innerHTML = `
     <div class="row">
       <div class="col-md-6">
         <h6>Información General</h6>
         <ul class="list-unstyled">
-          <li><strong>Tipo:</strong> <span class="badge ${getBadgeColor(rutina.tipo)}">${rutina.tipo.charAt(0).toUpperCase() + rutina.tipo.slice(1)}</span></li>
-          <li><strong>Nivel:</strong> <span class="badge bg-warning">${rutina.nivel}</span></li>
-          <li><strong>Duración:</strong> ${rutina.duracion} minutos</li>
+          <li><strong>Tipo:</strong> <span class="badge ${getBadgeColor(rutina.tipo)}">${rutina.tipo ? rutina.tipo.charAt(0).toUpperCase() + rutina.tipo.slice(1) : 'Sin tipo'}</span></li>
+          <li><strong>Nivel:</strong> <span class="badge bg-warning">${rutina.nivel || 'Sin nivel'}</span></li>
+          <li><strong>Duración:</strong> ${rutina.duracion || 0} minutos</li>
           <li><strong>Estado:</strong> <span class="badge ${getEstadoColor(rutina.estado)}">${getEstadoTexto(rutina.estado)}</span></li>
         </ul>
       </div>
       <div class="col-md-6">
         <h6>Descripción</h6>
-        <p>${rutina.descripcion}</p>
+        <p>${rutina.descripcion || 'Sin descripción'}</p>
       </div>
     </div>
     <div class="mt-3">
@@ -410,96 +368,7 @@ function verRutina(id) {
   modal.show();
 }
 
-function repetirRutina(id) {
-  const rutina = rutinas.find(r => r.id === id);
-  
-  // Crear una nueva rutina basada en la existente
-  const nuevaRutina = {
-    ...rutina,
-    id: Math.max(...rutinas.map(r => r.id)) + 1,
-    fecha: 'Programada: Hoy',
-    estado: 'pendiente'
-  };
-  
-  rutinas.unshift(nuevaRutina);
-  cargarRutinas();
-  actualizarEstadisticas();
-  
-  mostrarMensaje(`Rutina "${rutina.nombre}" agregada para repetir`, 'success');
-}
-
-function eliminarRutina(id) {
-  const rutina = rutinas.find(r => r.id === id);
-  
-  document.getElementById('modalConfirmacionTexto').textContent = 
-    `¿Estás seguro de que quieres eliminar la rutina "${rutina.nombre}"? Esta acción no se puede deshacer.`;
-  
-  const btnConfirmar = document.getElementById('btnConfirmarAccion');
-  btnConfirmar.onclick = function() {
-    const index = rutinas.findIndex(r => r.id === id);
-    if (index !== -1) {
-      rutinas.splice(index, 1);
-      cargarRutinas();
-      actualizarEstadisticas();
-      mostrarMensaje('Rutina eliminada correctamente', 'success');
-    }
-    
-    const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmacion'));
-    modal.hide();
-  };
-  
-  const modal = new bootstrap.Modal(document.getElementById('modalConfirmacion'));
-  modal.show();
-}
-
-function iniciarRutina() {
-  if (rutinaSeleccionada) {
-    rutinaSeleccionada.estado = 'en-progreso';
-    rutinaSeleccionada.fecha = 'En progreso';
-    
-    cargarRutinas();
-    actualizarEstadisticas();
-    
-    const modal = bootstrap.Modal.getInstance(document.getElementById('modalVerRutina'));
-    modal.hide();
-    
-    mostrarMensaje(`¡Comenzando rutina "${rutinaSeleccionada.nombre}"!`, 'success');
-  }
-}
-
-function actualizarEstadisticas(rutinasMostradas = rutinas) {
-  const total = rutinasMostradas.length;
-  const completadas = rutinasMostradas.filter(r => r.estado === 'completada').length;
-  const pendientes = rutinasMostradas.filter(r => r.estado === 'pendiente').length;
-  const minutos = rutinasMostradas.reduce((sum, r) => sum + r.duracion, 0);
-  
-  document.getElementById('totalRutinas').textContent = total;
-  document.getElementById('rutinasCompletadas').textContent = completadas;
-  document.getElementById('rutinasPendientes').textContent = pendientes;
-  document.getElementById('minutosTotales').textContent = minutos;
-}
-
-function mostrarMensaje(mensaje, tipo) {
-  // Crear alerta temporal
-  const alerta = document.createElement('div');
-  alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
-  alerta.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
-  alerta.innerHTML = `
-    ${mensaje}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  `;
-  
-  document.body.appendChild(alerta);
-  
-  // Remover después de 3 segundos
-  setTimeout(() => {
-    if (alerta.parentNode) {
-      alerta.remove();
-    }
-  }, 3000);
-}
-
-// Funciones auxiliares
+// Funciones auxiliares (se mantienen igual)
 function getBadgeColor(tipo) {
   const colores = {
     'fuerza': 'bg-primary',
@@ -534,6 +403,36 @@ function getTipoIcono(tipo) {
     'velocidad': 'bi bi-lightning-charge'
   };
   return iconos[tipo] || 'bi bi-activity';
+}
+
+function actualizarEstadisticas(rutinas) {
+  const total = rutinas.length;
+  const completadas = rutinas.filter(r => r.estado === 'completada').length;
+  const pendientes = rutinas.filter(r => r.estado === 'pendiente').length;
+  const minutos = rutinas.reduce((sum, r) => sum + (parseInt(r.duracion) || 0), 0);
+  
+  document.getElementById('totalRutinas').textContent = total;
+  document.getElementById('rutinasCompletadas').textContent = completadas;
+  document.getElementById('rutinasPendientes').textContent = pendientes;
+  document.getElementById('minutosTotales').textContent = minutos;
+}
+
+function mostrarMensaje(mensaje, tipo) {
+  const alerta = document.createElement('div');
+  alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+  alerta.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+  alerta.innerHTML = `
+    ${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  
+  document.body.appendChild(alerta);
+  
+  setTimeout(() => {
+    if (alerta.parentNode) {
+      alerta.remove();
+    }
+  }, 3000);
 }
 </script>
 {% endblock %}
