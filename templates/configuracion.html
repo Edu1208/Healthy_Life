@@ -1,156 +1,243 @@
 {% extends "base.html" %}
-{% block title %}Título de la Página - Healthy Life{% endblock %}
+{% block title %}Configuración - Healthy Life{% endblock %}
 {% block content %}
-  
-  <div class="container py-4">
-    <div class="text-center mb-4">
-      <h1 class="display-5 fw-bold text-success">Configuración</h1>
-      <p class="lead text-muted">Personaliza tu experiencia en Healthy Life</p>
+<div class="container py-4">
+  <div class="text-center mb-4">
+    <h1 class="display-5 fw-bold text-success">Configuración</h1>
+    <p class="lead text-muted">Personaliza tu experiencia en Healthy Life</p>
+  </div>
+
+  <div class="row g-4">
+    <!-- Preferencias de Notificaciones -->
+    <div class="col-12">
+      <div class="card settings-card">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0"><i class="bi bi-bell text-primary me-2"></i>Notificaciones</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="notificacionesActivas" checked>
+            <label class="form-check-label fw-medium" for="notificacionesActivas">
+              Notificaciones de recordatorio
+            </label>
+            <div class="form-text">Recibe recordatorios para mantener tu racha</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-medium">Hora de recordatorio</label>
+            <input type="time" class="form-control" id="horaRecordatorio" value="19:00">
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="row g-4">
-      <!-- Notificaciones -->
-      <div class="col-12">
-        <div class="card settings-card">
-          <div class="card-header bg-white">
-            <h5 class="card-title mb-0"><i class="bi bi-bell text-primary me-2"></i>Notificaciones</h5>
+    <!-- Preferencias de Visualización -->
+    <div class="col-12">
+      <div class="card settings-card">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0"><i class="bi bi-display text-info me-2"></i>Visualización</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="modoOscuro">
+            <label class="form-check-label fw-medium" for="modoOscuro">
+              Modo oscuro
+            </label>
+            <div class="form-text">Interfaz con colores oscuros</div>
           </div>
-          <div class="card-body">
-            <div class="form-check form-switch mb-3">
-              <input class="form-check-input" type="checkbox" id="notificationsSwitch" checked>
-              <label class="form-check-label fw-medium" for="notificationsSwitch">
-                Notificaciones push
-              </label>
-              <div class="form-text">Recibe recordatorios de tus rutinas y metas</div>
-            </div>
-            <div class="form-check form-switch mb-3">
-              <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
-              <label class="form-check-label fw-medium" for="emailNotifications">
-                Notificaciones por email
-              </label>
-              <div class="form-text">Resumen semanal de tu progreso</div>
-            </div>
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="soundNotifications">
-              <label class="form-check-label fw-medium" for="soundNotifications">
-                Sonido de notificaciones
-              </label>
-              <div class="form-text">Efectos de sonido al completar actividades</div>
-            </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="animaciones" checked>
+            <label class="form-check-label fw-medium" for="animaciones">
+              Animaciones
+            </label>
+            <div class="form-text">Efectos y transiciones en la interfaz</div>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Idioma -->
-      <div class="col-12">
-        <div class="card settings-card">
-          <div class="card-header bg-white">
-            <h5 class="card-title mb-0"><i class="bi bi-translate text-info me-2"></i>Idioma</h5>
-          </div>
-          <div class="card-body">
-            <div class="mb-3">
-              <label class="form-label fw-medium">Selecciona tu idioma preferido</label>
-              <select class="form-select">
-                <option selected>Español</option>
-                <option>English</option>
-                <option>Português</option>
-                <option>Français</option>
-              </select>
-            </div>
+    <!-- Exportación de Datos -->
+    <div class="col-12">
+      <div class="card settings-card">
+        <div class="card-header bg-white">
+          <h5 class="card-title mb-0"><i class="bi bi-download text-success me-2"></i>Datos</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <h6>Exportar datos</h6>
+            <p class="text-muted">Descarga todos tus datos en formato JSON</p>
+            <button class="btn btn-outline-success" onclick="exportarDatos()">
+              <i class="bi bi-download me-1"></i>Exportar Datos
+            </button>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Preferencias -->
-      <div class="col-12">
-        <div class="card settings-card">
-          <div class="card-header bg-white">
-            <h5 class="card-title mb-0"><i class="bi bi-sliders text-warning me-2"></i>Preferencias</h5>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-check form-switch mb-3">
-                  <input class="form-check-input" type="checkbox" id="streaksFeature" checked>
-                  <label class="form-check-label fw-medium" for="streaksFeature">
-                    Mostrar rachas
-                  </label>
-                  <div class="form-text">Visualiza tu progreso continuo</div>
-                </div>
-                <div class="form-check form-switch mb-3">
-                  <input class="form-check-input" type="checkbox" id="motivationQuotes" checked>
-                  <label class="form-check-label fw-medium" for="motivationQuotes">
-                    Citas motivacionales
-                  </label>
-                  <div class="form-text">Mensajes inspiradores diarios</div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-check form-switch mb-3">
-                  <input class="form-check-input" type="checkbox" id="recommendations" checked>
-                  <label class="form-check-label fw-medium" for="recommendations">
-                    Recomendaciones
-                  </label>
-                  <div class="form-text">Sugerencias personalizadas</div>
-                </div>
-                <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" id="darkMode">
-                  <label class="form-check-label fw-medium" for="darkMode">
-                    Modo oscuro
-                  </label>
-                  <div class="form-text">Interfaz con colores oscuros</div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <!-- Acciones Peligrosas -->
+    <div class="col-12">
+      <div class="card settings-card border-warning">
+        <div class="card-header bg-warning bg-opacity-10">
+          <h5 class="card-title mb-0"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Zona Peligrosa</h5>
         </div>
-      </div>
-
-      <!-- Perfil -->
-      <div class="col-12">
-        <div class="card settings-card">
-          <div class="card-header bg-white">
-            <h5 class="card-title mb-0"><i class="bi bi-person-circle text-success me-2"></i>Perfil</h5>
-          </div>
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="mb-1">Información personal</h6>
-                <p class="text-muted mb-0">Gestiona tus datos y preferencias de cuenta</p>
-              </div>
-              <button type="button" class="btn btn-outline-primary">
-                <i class="bi bi-pencil me-1"></i>Editar perfil
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Acciones -->
-      <div class="col-12">
-        <div class="card settings-card border-warning">
-          <div class="card-header bg-warning bg-opacity-10">
-            <h5 class="card-title mb-0"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Acciones</h5>
-          </div>
-          <div class="card-body">
-            <div class="row g-2">
-              <div class="col-md-6">
-                <button class="btn btn-outline-danger w-100">
-                  <i class="bi bi-trash me-1"></i>Eliminar cuenta
-                </button>
-              </div>
-              <div class="col-md-6">
-                <button class="btn btn-success w-100">
-                  <i class="bi bi-check-circle me-1"></i>Guardar cambios
-                </button>
-              </div>
-            </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <h6 class="text-warning">Eliminar cuenta</h6>
+            <p class="text-muted">Esta acción eliminará permanentemente tu cuenta y todos tus datos.</p>
+            <button class="btn btn-outline-danger" onclick="mostrarConfirmacionEliminar()">
+              <i class="bi bi-trash me-1"></i>Eliminar Cuenta
+            </button>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Contenido específico de la página aquí -->
+<!-- Modal de Confirmación Eliminar Cuenta -->
+<div class="modal fade" id="modalConfirmarEliminar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger">Confirmar Eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-danger">¿Estás seguro de que quieres eliminar tu cuenta?</p>
+        <p class="text-muted">Esta acción no se puede deshacer. Se eliminarán todos tus datos:</p>
+        <ul class="text-muted">
+          <li>Rutinas creadas</li>
+          <li>Historial de ejercicios</li>
+          <li>Notas personales</li>
+          <li>Datos de racha y progreso</li>
+        </ul>
+        <div class="mb-3">
+          <label class="form-label">Escribe "ELIMINAR" para confirmar:</label>
+          <input type="text" class="form-control" id="confirmacionTexto" placeholder="ELIMINAR">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" onclick="eliminarCuenta()" id="btnEliminarCuenta" disabled>
+          <i class="bi bi-trash me-1"></i>Eliminar Cuenta
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  cargarConfiguracion();
+  
+  // Validación para eliminar cuenta
+  document.getElementById('confirmacionTexto').addEventListener('input', function() {
+    const btnEliminar = document.getElementById('btnEliminarCuenta');
+    btnEliminar.disabled = this.value !== 'ELIMINAR';
+  });
+});
+
+function cargarConfiguracion() {
+  // Cargar configuración desde localStorage como fallback
+  const config = JSON.parse(localStorage.getItem('configuracion_healthy_life')) || {
+    notificaciones: true,
+    horaRecordatorio: '19:00',
+    modoOscuro: false,
+    animaciones: true
+  };
+  
+  document.getElementById('notificacionesActivas').checked = config.notificaciones;
+  document.getElementById('horaRecordatorio').value = config.horaRecordatorio;
+  document.getElementById('modoOscuro').checked = config.modoOscuro;
+  document.getElementById('animaciones').checked = config.animaciones;
+}
+
+function guardarConfiguracion() {
+  const config = {
+    notificaciones: document.getElementById('notificacionesActivas').checked,
+    horaRecordatorio: document.getElementById('horaRecordatorio').value,
+    modoOscuro: document.getElementById('modoOscuro').checked,
+    animaciones: document.getElementById('animaciones').checked
+  };
+  
+  // Guardar en localStorage
+  localStorage.setItem('configuracion_healthy_life', JSON.stringify(config));
+  
+  mostrarMensaje('Configuración guardada correctamente', 'success');
+}
+
+function exportarDatos() {
+  fetch('/exportar-datos')
+    .then(response => response.blob())
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'healthy_life_datos.json';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      mostrarMensaje('Datos exportados correctamente', 'success');
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al exportar datos', 'danger');
+    });
+}
+
+function mostrarConfirmacionEliminar() {
+  const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminar'));
+  modal.show();
+}
+
+function eliminarCuenta() {
+  fetch('/eliminar-cuenta', {
+    method: 'DELETE'
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = '/';
+    } else {
+      mostrarMensaje(data.message, 'danger');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    mostrarMensaje('Error al eliminar la cuenta', 'danger');
+  });
+}
+
+function mostrarMensaje(mensaje, tipo) {
+  const alerta = document.createElement('div');
+  alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+  alerta.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+  alerta.innerHTML = `
+    ${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  
+  document.body.appendChild(alerta);
+  
+  setTimeout(() => {
+    if (alerta.parentNode) alerta.remove();
+  }, 3000);
+}
+
+// Guardar configuración cuando cambien los valores
+document.querySelectorAll('input[type="checkbox"], input[type="time"]').forEach(input => {
+  input.addEventListener('change', guardarConfiguracion);
+});
+</script>
+
+<style>
+.settings-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+</style>
 {% endblock %}
