@@ -5,9 +5,9 @@
   <!-- Header de Racha -->
   <div class="row justify-content-center mb-5">
     <div class="col-lg-8">
-      <div class="streak-card bg-white p-4 text-center">
+      <div class="streak-card bg-white p-4 text-center rounded shadow">
         <div class="streak-flame mb-3">
-          <i class="bi bi-fire"></i>
+          <i class="bi bi-fire text-warning" style="font-size: 4rem;"></i>
         </div>
         <h1 class="display-4 fw-bold text-warning mb-2" id="diasConsecutivos">0</h1>
         <h3 class="text-dark mb-3">Días Consecutivos</h3>
@@ -38,7 +38,7 @@
   <div class="row g-4">
     <!-- Calendario de Racha -->
     <div class="col-lg-8">
-      <div class="streak-card bg-white p-4">
+      <div class="streak-card bg-white p-4 rounded shadow">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h4 class="mb-0">
             <i class="bi bi-calendar3 text-primary me-2"></i>Calendario de Progreso
@@ -88,7 +88,7 @@
     <!-- Próximos Hitos y Estadísticas -->
     <div class="col-lg-4">
       <!-- Próximos Hitos -->
-      <div class="streak-card bg-white p-4 mb-4">
+      <div class="streak-card bg-white p-4 mb-4 rounded shadow">
         <h5 class="mb-4">
           <i class="bi bi-flag text-success me-2"></i>Próximos Hitos
         </h5>
@@ -98,7 +98,7 @@
       </div>
 
       <!-- Estadísticas de Racha -->
-      <div class="streak-card bg-white p-4">
+      <div class="streak-card bg-white p-4 mb-4 rounded shadow">
         <h5 class="mb-4">
           <i class="bi bi-graph-up text-info me-2"></i>Estadísticas
         </h5>
@@ -132,7 +132,7 @@
       </div>
 
       <!-- Acciones Rápidas -->
-      <div class="streak-card bg-white p-4 mt-4">
+      <div class="streak-card bg-white p-4 rounded shadow">
         <h5 class="mb-3">
           <i class="bi bi-lightning text-warning me-2"></i>Acciones
         </h5>
@@ -143,6 +143,9 @@
           <button class="btn btn-outline-primary" onclick="compartirRacha()">
             <i class="bi bi-share me-2"></i>Compartir Racha
           </button>
+          <a href="{{ url_for('nuevo') }}" class="btn btn-outline-info">
+            <i class="bi bi-plus-circle me-2"></i>Nueva Rutina
+          </a>
         </div>
       </div>
     </div>
@@ -159,53 +162,35 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function cargarDatosRacha() {
-  // Intentar cargar desde el backend primero
   fetch('/racha/datos')
     .then(response => response.json())
     .then(data => {
       if (data.success) {
         actualizarRacha(data.racha);
       } else {
-        // Fallback a localStorage
-        const datosRacha = JSON.parse(localStorage.getItem('racha_healthy_life')) || {
+        console.error('Error al cargar racha:', data.message);
+        // Fallback a datos vacíos
+        actualizarRacha({
           diasConsecutivos: 0,
           recordPersonal: 0,
           diasCompletados: [],
           fechaUltimoDia: null
-        };
-        actualizarRacha(datosRacha);
+        });
       }
     })
     .catch(error => {
       console.error('Error:', error);
-      // Fallback a localStorage
-      const datosRacha = JSON.parse(localStorage.getItem('racha_healthy_life')) || {
+      // Fallback a datos vacíos
+      actualizarRacha({
         diasConsecutivos: 0,
         recordPersonal: 0,
         diasCompletados: [],
         fechaUltimoDia: null
-      };
-      actualizarRacha(datosRacha);
+      });
     });
 }
 
 function actualizarRacha(datosRacha) {
-  const hoy = new Date().toDateString();
-  const ultimoDia = datosRacha.fechaUltimoDia ? new Date(datosRacha.fechaUltimoDia).toDateString() : null;
-  
-  // Verificar si ya se marcó hoy
-  const yaMarcadoHoy = datosRacha.diasCompletados.includes(hoy);
-  
-  if (!yaMarcadoHoy && ultimoDia) {
-    const ayer = new Date();
-    ayer.setDate(ayer.getDate() - 1);
-    
-    // Si el último día no fue ayer, reiniciar racha
-    if (ultimoDia !== ayer.toDateString()) {
-      datosRacha.diasConsecutivos = 0;
-    }
-  }
-  
   document.getElementById('diasConsecutivos').textContent = datosRacha.diasConsecutivos;
   document.getElementById('rachaActual').textContent = datosRacha.diasConsecutivos;
   document.getElementById('recordPersonal').textContent = datosRacha.recordPersonal;
@@ -233,19 +218,16 @@ function actualizarRacha(datosRacha) {
 }
 
 function marcarDiaHoy() {
-  const hoy = new Date().toISOString().split('T')[0];
-  
   fetch('/racha/marcar-dia', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ fecha: hoy })
+    }
   })
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      mostrarMensaje('¡Día marcado correctamente! Sigue con la racha.', 'success');
+      mostrarMensaje(data.message, 'success');
       cargarDatosRacha();
     } else {
       mostrarMensaje(data.message, 'warning');
@@ -253,44 +235,8 @@ function marcarDiaHoy() {
   })
   .catch(error => {
     console.error('Error:', error);
-    // Fallback a localStorage
-    marcarDiaLocalStorage();
+    mostrarMensaje('Error al marcar el día', 'danger');
   });
-}
-
-function marcarDiaLocalStorage() {
-  let datosRacha = JSON.parse(localStorage.getItem('racha_healthy_life')) || {
-    diasConsecutivos: 0,
-    recordPersonal: 0,
-    diasCompletados: [],
-    fechaUltimoDia: null
-  };
-  
-  const hoy = new Date().toDateString();
-  
-  if (datosRacha.diasCompletados.includes(hoy)) {
-    mostrarMensaje('¡Ya has marcado tu entrenamiento para hoy!', 'info');
-    return;
-  }
-  
-  // Agregar día actual
-  datosRacha.diasCompletados.push(hoy);
-  datosRacha.fechaUltimoDia = new Date().toISOString();
-  
-  // Actualizar racha consecutiva
-  datosRacha.diasConsecutivos++;
-  
-  // Actualizar récord personal
-  if (datosRacha.diasConsecutivos > datosRacha.recordPersonal) {
-    datosRacha.recordPersonal = datosRacha.diasConsecutivos;
-  }
-  
-  // Guardar en localStorage
-  localStorage.setItem('racha_healthy_life', JSON.stringify(datosRacha));
-  
-  // Actualizar interfaz
-  actualizarRacha(datosRacha);
-  mostrarMensaje('¡Día marcado correctamente! Sigue con la racha.', 'success');
 }
 
 function generarCalendario(diasCompletados) {
@@ -381,16 +327,19 @@ function actualizarHitos(diasConsecutivos) {
   hitos.forEach(hito => {
     const diasRestantes = hito - diasConsecutivos;
     const porcentaje = Math.min(Math.round((diasConsecutivos / hito) * 100), 100);
+    const alcanzado = diasConsecutivos >= hito;
     
     const hitoHTML = `
-      <div class="milestone-badge mb-3">
+      <div class="milestone-badge mb-3 p-3 rounded ${alcanzado ? 'bg-success bg-opacity-10' : 'bg-light'}">
         <div class="d-flex justify-content-between align-items-center mb-1">
-          <h6 class="text-success mb-0">${hito} días</h6>
-          <span class="badge bg-success">${porcentaje}%</span>
+          <h6 class="${alcanzado ? 'text-success' : 'text-dark'} mb-0">${hito} días</h6>
+          <span class="badge ${alcanzado ? 'bg-success' : 'bg-secondary'}">${porcentaje}%</span>
         </div>
-        <small class="text-muted">${diasRestantes > 0 ? diasRestantes + ' días restantes' : '¡Hito alcanzado!'}</small>
+        <small class="${alcanzado ? 'text-success' : 'text-muted'}">
+          ${alcanzado ? '¡Hito alcanzado! 🎉' : (diasRestantes > 0 ? diasRestantes + ' días restantes' : '¡Casi ahí!')}
+        </small>
         <div class="progress mt-1" style="height: 4px;">
-          <div class="progress-bar bg-success" style="width: ${porcentaje}%"></div>
+          <div class="progress-bar ${alcanzado ? 'bg-success' : 'bg-primary'}" style="width: ${porcentaje}%"></div>
         </div>
       </div>
     `;
@@ -411,7 +360,9 @@ function calcularTasaExito(diasCompletados) {
 
 function compartirRacha() {
   const diasConsecutivos = document.getElementById('diasConsecutivos').textContent;
-  const texto = `¡Llevo ${diasConsecutivos} días consecutivos entrenando con Healthy Life! 💪\n\n¡Únete a mi desafío! #HealthyLife #Fitness`;
+  const recordPersonal = document.getElementById('recordPersonal').textContent;
+  
+  const texto = `¡Llevo ${diasConsecutivos} días consecutivos entrenando con Healthy Life! 💪\nMi récord personal: ${recordPersonal} días.\n\n¡Únete a mi desafío! #HealthyLife #Fitness`;
   
   if (navigator.share) {
     navigator.share({
@@ -446,14 +397,16 @@ function mostrarMensaje(mensaje, tipo) {
 
 <style>
 .streak-card {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   border: none;
 }
 
 .streak-flame {
-  font-size: 3rem;
-  color: #ff6b35;
+  animation: flamePulse 2s ease-in-out infinite;
+}
+
+@keyframes flamePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 .calendar-day {
@@ -466,17 +419,20 @@ function mostrarMensaje(mensaje, tipo) {
   margin: 0 auto;
   font-size: 0.875rem;
   border: 2px solid transparent;
+  transition: all 0.3s ease;
 }
 
 .calendar-day.completed {
   background-color: #198754;
   color: white;
+  transform: scale(1.1);
 }
 
 .calendar-day.current {
   background-color: #ffc107;
   color: black;
   border-color: #ff6b35;
+  font-weight: bold;
 }
 
 .calendar-day.future {
@@ -490,10 +446,18 @@ function mostrarMensaje(mensaje, tipo) {
   opacity: 0.5;
 }
 
+.calendar-day:hover:not(.completed):not(.other-month) {
+  background-color: #e9ecef;
+  transform: scale(1.05);
+}
+
 .milestone-badge {
-  padding: 0.75rem;
-  border-radius: 8px;
-  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+}
+
+.milestone-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 </style>
 {% endblock %}
