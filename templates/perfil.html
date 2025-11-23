@@ -3,11 +3,11 @@
 {% block content %}
 <div class="container py-4">
   <!-- Header del Perfil -->
-  <div class="profile-header p-4 mb-4">
+  <div class="profile-header text-white p-4 mb-4 rounded">
     <div class="row align-items-center">
       <div class="col-auto">
-        <div class="achievement-badge bg-white text-success">
-          <i class="bi bi-person-fill"></i>
+        <div class="achievement-badge bg-white text-success rounded-circle">
+          <i class="bi bi-person-fill fs-1"></i>
         </div>
       </div>
       <div class="col">
@@ -18,6 +18,46 @@
         <button class="btn btn-light btn-sm" onclick="editarPerfil()">
           <i class="bi bi-pencil me-1"></i>Editar
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas Principales -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="stats-card bg-white p-3 text-center rounded shadow-sm">
+        <div class="text-warning mb-2">
+          <i class="bi bi-fire fs-1"></i>
+        </div>
+        <h4 class="text-warning mb-1" id="rachaPerfil">0</h4>
+        <p class="text-muted mb-0">Racha Actual</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card bg-white p-3 text-center rounded shadow-sm">
+        <div class="text-primary mb-2">
+          <i class="bi bi-dumbbell fs-1"></i>
+        </div>
+        <h4 class="text-primary mb-1" id="rutinasCompletadas">0</h4>
+        <p class="text-muted mb-0">Rutinas Completadas</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card bg-white p-3 text-center rounded shadow-sm">
+        <div class="text-success mb-2">
+          <i class="bi bi-journal-text fs-1"></i>
+        </div>
+        <h4 class="text-success mb-1" id="totalNotas">0</h4>
+        <p class="text-muted mb-0">Notas Creadas</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card bg-white p-3 text-center rounded shadow-sm">
+        <div class="text-info mb-2">
+          <i class="bi bi-calendar-check fs-1"></i>
+        </div>
+        <h4 class="text-info mb-1" id="fechaRegistro">-</h4>
+        <p class="text-muted mb-0">Miembro Desde</p>
       </div>
     </div>
   </div>
@@ -36,6 +76,24 @@
           <p class="card-text" id="descripcionPerfil">
             Cargando información del perfil...
           </p>
+          <div class="mt-3" id="etiquetasPerfil">
+            <!-- Las etiquetas se cargarán dinámicamente -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Especialidad -->
+      <div class="card stats-card">
+        <div class="card-header bg-white border-0">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-star text-warning me-2"></i>Especialidad
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-center">
+            <span class="badge bg-primary fs-6 me-3" id="especialidadPerfil">General</span>
+            <small class="text-muted">Tu área principal de enfoque en el fitness</small>
+          </div>
         </div>
       </div>
     </div>
@@ -53,7 +111,13 @@
             <button class="btn btn-outline-primary" onclick="editarPerfil()">
               <i class="bi bi-pencil me-2"></i>Editar Perfil
             </button>
-            <button class="btn btn-outline-info" onclick="exportarDatos()">
+            <a href="{{ url_for('nuevo') }}" class="btn btn-outline-success">
+              <i class="bi bi-plus-circle me-2"></i>Nueva Rutina
+            </a>
+            <a href="{{ url_for('notas') }}" class="btn btn-outline-info">
+              <i class="bi bi-journal-text me-2"></i>Mis Notas
+            </a>
+            <button class="btn btn-outline-warning" onclick="exportarDatos()">
               <i class="bi bi-download me-2"></i>Exportar Datos
             </button>
           </div>
@@ -79,7 +143,23 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Descripción</label>
-            <textarea class="form-control" id="textareaDescripcion" rows="4"></textarea>
+            <textarea class="form-control" id="textareaDescripcion" rows="4" placeholder="Cuéntanos sobre tus objetivos fitness..."></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Especialidad</label>
+            <select class="form-select" id="selectEspecialidad">
+              <option value="General">General</option>
+              <option value="Fuerza">Fuerza</option>
+              <option value="Cardio">Cardio</option>
+              <option value="Velocidad">Velocidad</option>
+              <option value="Flexibilidad">Flexibilidad</option>
+              <option value="Yoga">Yoga</option>
+              <option value="Crossfit">Crossfit</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Etiquetas (separadas por comas)</label>
+            <input type="text" class="form-control" id="inputEtiquetas" placeholder="Ej: Fuerza, Consistencia, Salud, Nutrición">
           </div>
         </form>
       </div>
@@ -117,9 +197,26 @@ function cargarPerfil() {
 }
 
 function mostrarPerfil(perfil) {
-  document.getElementById('nombreUsuario').textContent = perfil.nombre || 'Usuario';
-  document.getElementById('idUsuario').textContent = perfil._id || '-';
-  document.getElementById('descripcionPerfil').textContent = perfil.descripcion || 'Sin descripción';
+  document.getElementById('nombreUsuario').textContent = perfil.nombre;
+  document.getElementById('idUsuario').textContent = perfil._id;
+  document.getElementById('descripcionPerfil').textContent = perfil.descripcion;
+  document.getElementById('especialidadPerfil').textContent = perfil.especialidad;
+  document.getElementById('fechaRegistro').textContent = perfil.fecha_registro;
+  
+  // Estadísticas
+  document.getElementById('rachaPerfil').textContent = perfil.estadisticas.racha_actual;
+  document.getElementById('rutinasCompletadas').textContent = perfil.estadisticas.rutinas_completadas;
+  document.getElementById('totalNotas').textContent = perfil.estadisticas.total_notas;
+  
+  // Etiquetas
+  const etiquetasContainer = document.getElementById('etiquetasPerfil');
+  etiquetasContainer.innerHTML = '';
+  perfil.etiquetas.forEach(etiqueta => {
+    const badge = document.createElement('span');
+    badge.className = 'badge bg-primary me-2 mb-2';
+    badge.textContent = '#' + etiqueta;
+    etiquetasContainer.appendChild(badge);
+  });
 }
 
 function editarPerfil() {
@@ -128,8 +225,10 @@ function editarPerfil() {
     .then(data => {
       if (data.success) {
         const perfil = data.perfil;
-        document.getElementById('inputNombre').value = perfil.nombre || '';
-        document.getElementById('textareaDescripcion').value = perfil.descripcion || '';
+        document.getElementById('inputNombre').value = perfil.nombre;
+        document.getElementById('textareaDescripcion').value = perfil.descripcion;
+        document.getElementById('selectEspecialidad').value = perfil.especialidad;
+        document.getElementById('inputEtiquetas').value = perfil.etiquetas.join(', ');
         
         const modal = new bootstrap.Modal(document.getElementById('modalEditarPerfil'));
         modal.show();
@@ -144,16 +243,30 @@ function editarPerfil() {
 function guardarPerfil() {
   const nombre = document.getElementById('inputNombre').value.trim();
   const descripcion = document.getElementById('textareaDescripcion').value.trim();
+  const especialidad = document.getElementById('selectEspecialidad').value;
+  const etiquetasInput = document.getElementById('inputEtiquetas').value.trim();
+
+  if (!nombre) {
+    mostrarMensaje('El nombre es obligatorio', 'warning');
+    return;
+  }
+
+  const perfilData = {
+    nombre: nombre,
+    descripcion: descripcion,
+    especialidad: especialidad
+  };
+
+  if (etiquetasInput) {
+    perfilData.etiquetas = etiquetasInput.split(',').map(e => e.trim()).filter(e => e);
+  }
 
   fetch('/perfil/editar', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      nombre: nombre,
-      descripcion: descripcion
-    })
+    body: JSON.stringify(perfilData)
   })
   .then(response => response.json())
   .then(data => {
@@ -212,24 +325,25 @@ function mostrarMensaje(mensaje, tipo) {
 <style>
 .profile-header {
   background: linear-gradient(135deg, #198754, #20c997);
-  border-radius: 12px;
-  color: white;
 }
 
 .stats-card {
   border: none;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
 }
 
 .achievement-badge {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 </style>
