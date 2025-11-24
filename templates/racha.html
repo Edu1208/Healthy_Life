@@ -43,7 +43,15 @@
           <h4 class="mb-0">
             <i class="bi bi-calendar3 text-primary me-2"></i>Calendario de Progreso
           </h4>
-          <span class="badge bg-success" id="mesActual">Octubre 2025</span>
+          <div>
+            <button class="btn btn-sm btn-outline-secondary me-2" id="btnMesAnterior">
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <span class="badge bg-success" id="mesActual">Octubre 2025</span>
+            <button class="btn btn-sm btn-outline-secondary ms-2" id="btnMesSiguiente">
+              <i class="bi bi-chevron-right"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Días de la semana -->
@@ -77,8 +85,8 @@
           </div>
           <div class="col-md-4">
             <div class="d-flex align-items-center justify-content-center">
-              <div class="calendar-day future me-2"></div>
-              <small>Próximo</small>
+              <div class="calendar-day missed me-2"></div>
+              <small>Perdido</small>
             </div>
           </div>
         </div>
@@ -137,14 +145,17 @@
           <i class="bi bi-lightning text-warning me-2"></i>Acciones
         </h5>
         <div class="d-grid gap-2">
-          <button class="btn btn-success" onclick="marcarDiaHoy()">
+          <button class="btn btn-success" id="btnMarcarHoy">
             <i class="bi bi-check-circle me-2"></i>Marcar Hoy
           </button>
-          <button class="btn btn-outline-primary" onclick="compartirRacha()">
+          <button class="btn btn-outline-primary" id="btnCompartirRacha">
             <i class="bi bi-share me-2"></i>Compartir Racha
           </button>
-          <button class="btn btn-outline-info" onclick="configurarRecordatorio()">
+          <button class="btn btn-outline-info" id="btnConfigurarRecordatorio">
             <i class="bi bi-bell me-2"></i>Recordatorios
+          </button>
+          <button class="btn btn-outline-danger" id="btnReiniciarRacha">
+            <i class="bi bi-arrow-clockwise me-2"></i>Reiniciar Racha
           </button>
         </div>
       </div>
@@ -174,7 +185,26 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-success" onclick="guardarRecordatorio()">Guardar</button>
+        <button type="button" class="btn btn-success" id="btnGuardarRecordatorio">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación de Reinicio -->
+<div class="modal fade" id="modalReiniciar" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reiniciar Racha</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que quieres reiniciar tu racha? Esta acción eliminará todos tus datos de progreso y no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmarReinicio">Sí, Reiniciar</button>
       </div>
     </div>
   </div>
@@ -184,7 +214,8 @@
 
 {% block scripts %}
 <script>
-let datosRacha = JSON.parse(localStorage.getItem('racha_healthy_life')) || {
+// Datos de la racha
+let datosRacha = {
   diasConsecutivos: 0,
   recordPersonal: 0,
   diasCompletados: [],
@@ -196,31 +227,75 @@ let datosRacha = JSON.parse(localStorage.getItem('racha_healthy_life')) || {
   }
 };
 
+// Variables para navegación del calendario
+let mesCalendario = new Date().getMonth();
+let añoCalendario = new Date().getFullYear();
+
+// Cargar datos guardados
+function cargarDatosRacha() {
+  const datosGuardados = localStorage.getItem('racha_healthy_life');
+  if (datosGuardados) {
+    try {
+      datosRacha = { ...datosRacha, ...JSON.parse(datosGuardados) };
+    } catch (e) {
+      console.error('Error al cargar datos de racha:', e);
+    }
+  }
+}
+
+// Guardar datos
+function guardarDatosRacha() {
+  try {
+    localStorage.setItem('racha_healthy_life', JSON.stringify(datosRacha));
+  } catch (e) {
+    console.error('Error al guardar datos de racha:', e);
+  }
+}
+
 // Cargar datos al iniciar
 document.addEventListener('DOMContentLoaded', function() {
+  cargarDatosRacha();
+  inicializarEventListeners();
   actualizarRacha();
   generarCalendario();
   actualizarEstadisticas();
   actualizarHitos();
 });
 
+function inicializarEventListeners() {
+  // Botones de navegación del calendario
+  document.getElementById('btnMesAnterior').addEventListener('click', mesAnterior);
+  document.getElementById('btnMesSiguiente').addEventListener('click', mesSiguiente);
+  
+  // Botones de acciones
+  document.getElementById('btnMarcarHoy').addEventListener('click', marcarDiaHoy);
+  document.getElementById('btnCompartirRacha').addEventListener('click', compartirRacha);
+  document.getElementById('btnConfigurarRecordatorio').addEventListener('click', configurarRecordatorio);
+  document.getElementById('btnReiniciarRacha').addEventListener('click', mostrarModalReinicio);
+  document.getElementById('btnConfirmarReinicio').addEventListener('click', reiniciarRacha);
+  document.getElementById('btnGuardarRecordatorio').addEventListener('click', guardarRecordatorio);
+}
+
 function actualizarRacha() {
-  const hoy = new Date().toDateString();
-  const ultimoDia = datosRacha.fechaUltimoDia ? new Date(datosRacha.fechaUltimoDia).toDateString() : null;
+  const hoy = new Date();
+  const hoyStr = hoy.toDateString();
   
   // Verificar si ya se marcó hoy
-  const yaMarcadoHoy = datosRacha.diasCompletados.includes(hoy);
+  const yaMarcadoHoy = datosRacha.diasCompletados.includes(hoyStr);
   
-  if (!yaMarcadoHoy && ultimoDia) {
-    const ayer = new Date();
+  // Actualizar racha si no se ha marcado hoy y el último día fue ayer
+  if (!yaMarcadoHoy && datosRacha.fechaUltimoDia) {
+    const ultimoDia = new Date(datosRacha.fechaUltimoDia);
+    const ayer = new Date(hoy);
     ayer.setDate(ayer.getDate() - 1);
     
     // Si el último día no fue ayer, reiniciar racha
-    if (ultimoDia !== ayer.toDateString()) {
+    if (ultimoDia.toDateString() !== ayer.toDateString()) {
       datosRacha.diasConsecutivos = 0;
     }
   }
   
+  // Actualizar interfaz
   document.getElementById('diasConsecutivos').textContent = datosRacha.diasConsecutivos;
   document.getElementById('rachaActual').textContent = datosRacha.diasConsecutivos;
   document.getElementById('recordPersonal').textContent = datosRacha.recordPersonal;
@@ -243,16 +318,17 @@ function actualizarRacha() {
 }
 
 function marcarDiaHoy() {
-  const hoy = new Date().toDateString();
+  const hoy = new Date();
+  const hoyStr = hoy.toDateString();
   
-  if (datosRacha.diasCompletados.includes(hoy)) {
+  if (datosRacha.diasCompletados.includes(hoyStr)) {
     mostrarMensaje('¡Ya has marcado tu entrenamiento para hoy!', 'info');
     return;
   }
   
   // Agregar día actual
-  datosRacha.diasCompletados.push(hoy);
-  datosRacha.fechaUltimoDia = new Date().toISOString();
+  datosRacha.diasCompletados.push(hoyStr);
+  datosRacha.fechaUltimoDia = hoy.toISOString();
   
   // Actualizar racha consecutiva
   datosRacha.diasConsecutivos++;
@@ -263,7 +339,7 @@ function marcarDiaHoy() {
   }
   
   // Guardar en localStorage
-  localStorage.setItem('racha_healthy_life', JSON.stringify(datosRacha));
+  guardarDatosRacha();
   
   // Actualizar interfaz
   actualizarRacha();
@@ -276,15 +352,17 @@ function marcarDiaHoy() {
 
 function generarCalendario() {
   const container = document.getElementById('calendarioContainer');
+  if (!container) return;
+  
   const hoy = new Date();
-  const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-  const ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+  const primerDiaMes = new Date(añoCalendario, mesCalendario, 1);
+  const ultimoDiaMes = new Date(añoCalendario, mesCalendario + 1, 0);
   
   let calendarioHTML = '';
-  let fechaActual = new Date(primerDia);
+  let fechaActual = new Date(primerDiaMes);
   
   // Ajustar para que empiece en lunes
-  const diaSemana = primerDia.getDay();
+  const diaSemana = primerDiaMes.getDay();
   const ajusteInicio = diaSemana === 0 ? 6 : diaSemana - 1;
   fechaActual.setDate(fechaActual.getDate() - ajusteInicio);
   
@@ -295,25 +373,30 @@ function generarCalendario() {
     for (let dia = 0; dia < 7; dia++) {
       const fechaStr = fechaActual.toDateString();
       const esHoy = fechaActual.toDateString() === hoy.toDateString();
-      const esMesActual = fechaActual.getMonth() === hoy.getMonth();
+      const esMesActual = fechaActual.getMonth() === mesCalendario;
       const completado = datosRacha.diasCompletados.includes(fechaStr);
       const esFuturo = fechaActual > hoy;
+      const esPasado = fechaActual < hoy && !completado && !esFuturo;
       
       let claseDia = 'calendar-day';
       if (completado) {
         claseDia += ' completed';
       } else if (esHoy) {
         claseDia += ' current';
+      } else if (esPasado) {
+        claseDia += ' missed';
       } else if (esFuturo) {
         claseDia += ' future';
       } else if (!esMesActual) {
         claseDia += ' other-month';
       }
       
+      const diaNumero = fechaActual.getDate();
+      
       calendarioHTML += `
         <div class="col">
-          <div class="${claseDia}" onclick="${esHoy && !completado ? 'marcarDiaHoy()' : ''}" style="${esHoy && !completado ? 'cursor: pointer;' : ''}">
-            ${fechaActual.getDate()}
+          <div class="${claseDia}" ${esHoy && !completado ? 'onclick="marcarDiaHoy()" style="cursor: pointer;"' : ''}>
+            ${diaNumero}
           </div>
         </div>
       `;
@@ -324,13 +407,39 @@ function generarCalendario() {
     calendarioHTML += '</div>';
     
     // Si ya pasamos el último día del mes, salir
-    if (fechaActual > ultimoDia && fechaActual.getDate() > 20) {
+    if (fechaActual > ultimoDiaMes && fechaActual.getDate() > 20) {
       break;
     }
   }
   
   container.innerHTML = calendarioHTML;
-  document.getElementById('mesActual').textContent = hoy.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  
+  // Actualizar mes actual
+  const mesActualElement = document.getElementById('mesActual');
+  if (mesActualElement) {
+    mesActualElement.textContent = new Date(añoCalendario, mesCalendario).toLocaleDateString('es-ES', { 
+      month: 'long', 
+      year: 'numeric' 
+    });
+  }
+}
+
+function mesAnterior() {
+  mesCalendario--;
+  if (mesCalendario < 0) {
+    mesCalendario = 11;
+    añoCalendario--;
+  }
+  generarCalendario();
+}
+
+function mesSiguiente() {
+  mesCalendario++;
+  if (mesCalendario > 11) {
+    mesCalendario = 0;
+    añoCalendario++;
+  }
+  generarCalendario();
 }
 
 function actualizarEstadisticas() {
@@ -341,43 +450,58 @@ function actualizarEstadisticas() {
   // Calcular días activos este mes
   const diasActivosMes = datosRacha.diasCompletados.filter(fecha => {
     const fechaObj = new Date(fecha);
-    return fechaObj.getMonth() === hoy.getMonth() && fechaObj.getFullYear() === hoy.getFullYear();
+    return fechaObj.getMonth() === hoy.getMonth() && 
+           fechaObj.getFullYear() === hoy.getFullYear();
   }).length;
   
-  const consistencia = Math.round((diasActivosMes / hoy.getDate()) * 100);
+  const diasTranscurridos = hoy.getDate();
+  const consistencia = diasTranscurridos > 0 ? 
+    Math.round((diasActivosMes / diasTranscurridos) * 100) : 0;
+  
   const porcentajeDiasActivos = Math.round((diasActivosMes / diasEnMes) * 100);
   
   // Metas (simuladas)
   const metasTotales = 15;
   const metasCompletadas = Math.min(Math.round(diasActivosMes * 0.8), metasTotales);
   
-  document.getElementById('consistenciaMensual').textContent = consistencia + '%';
-  document.getElementById('barraConsistencia').style.width = consistencia + '%';
+  // Actualizar elementos si existen
+  const consistenciaElement = document.getElementById('consistenciaMensual');
+  const barraConsistencia = document.getElementById('barraConsistencia');
+  const diasActivosElement = document.getElementById('diasActivos');
+  const barraDiasActivos = document.getElementById('barraDiasActivos');
+  const metasAlcanzadasElement = document.getElementById('metasAlcanzadas');
+  const barraMetas = document.getElementById('barraMetas');
   
-  document.getElementById('diasActivos').textContent = `${diasActivosMes}/${diasEnMes}`;
-  document.getElementById('barraDiasActivos').style.width = porcentajeDiasActivos + '%';
+  if (consistenciaElement) consistenciaElement.textContent = consistencia + '%';
+  if (barraConsistencia) barraConsistencia.style.width = consistencia + '%';
   
-  document.getElementById('metasAlcanzadas').textContent = `${metasCompletadas}/${metasTotales}`;
-  document.getElementById('barraMetas').style.width = Math.round((metasCompletadas / metasTotales) * 100) + '%';
+  if (diasActivosElement) diasActivosElement.textContent = `${diasActivosMes}/${diasEnMes}`;
+  if (barraDiasActivos) barraDiasActivos.style.width = porcentajeDiasActivos + '%';
+  
+  if (metasAlcanzadasElement) metasAlcanzadasElement.textContent = `${metasCompletadas}/${metasTotales}`;
+  if (barraMetas) barraMetas.style.width = Math.round((metasCompletadas / metasTotales) * 100) + '%';
 }
 
 function actualizarHitos() {
   const listaHitos = document.getElementById('listaHitos');
+  if (!listaHitos) return;
+  
   listaHitos.innerHTML = '';
   
   datosRacha.hitos.forEach(hito => {
     const diasRestantes = hito - datosRacha.diasConsecutivos;
     const porcentaje = Math.min(Math.round((datosRacha.diasConsecutivos / hito) * 100), 100);
+    const alcanzado = datosRacha.diasConsecutivos >= hito;
     
     const hitoHTML = `
       <div class="milestone-badge mb-3">
         <div class="d-flex justify-content-between align-items-center mb-1">
-          <h6 class="text-success mb-0">${hito} días</h6>
-          <span class="badge bg-success">${porcentaje}%</span>
+          <h6 class="${alcanzado ? 'text-success' : 'text-dark'} mb-0">${hito} días</h6>
+          <span class="badge ${alcanzado ? 'bg-success' : 'bg-secondary'}">${alcanzado ? '¡Logrado!' : porcentaje + '%'}</span>
         </div>
-        <small class="text-muted">${diasRestantes > 0 ? diasRestantes + ' días restantes' : '¡Hito alcanzado!'}</small>
+        <small class="text-muted">${alcanzado ? '¡Felicidades!' : (diasRestantes > 0 ? diasRestantes + ' días restantes' : '¡Casi lo logras!')}</small>
         <div class="progress mt-1" style="height: 4px;">
-          <div class="progress-bar bg-success" style="width: ${porcentaje}%"></div>
+          <div class="progress-bar ${alcanzado ? 'bg-success' : 'bg-secondary'}" style="width: ${porcentaje}%"></div>
         </div>
       </div>
     `;
@@ -389,7 +513,8 @@ function actualizarHitos() {
 function calcularTasaExito() {
   if (datosRacha.diasCompletados.length === 0) return 0;
   
-  const primerDia = new Date(Math.min(...datosRacha.diasCompletados.map(d => new Date(d))));
+  const fechas = datosRacha.diasCompletados.map(d => new Date(d));
+  const primerDia = new Date(Math.min(...fechas));
   const hoy = new Date();
   const diasTotales = Math.ceil((hoy - primerDia) / (1000 * 60 * 60 * 24)) + 1;
   
@@ -414,26 +539,71 @@ function compartirRacha() {
 }
 
 function configurarRecordatorio() {
-  const modal = new bootstrap.Modal(document.getElementById('modalRecordatorio'));
+  const modalElement = document.getElementById('modalRecordatorio');
+  if (!modalElement) return;
+  
+  const horaInput = document.getElementById('horaRecordatorio');
+  const activoInput = document.getElementById('recordatorioActivo');
+  
+  if (horaInput) horaInput.value = datosRacha.recordatorio.hora;
+  if (activoInput) activoInput.checked = datosRacha.recordatorio.activo;
+  
+  const modal = new bootstrap.Modal(modalElement);
   modal.show();
 }
 
 function guardarRecordatorio() {
-  datosRacha.recordatorio.hora = document.getElementById('horaRecordatorio').value;
-  datosRacha.recordatorio.activo = document.getElementById('recordatorioActivo').checked;
+  const horaInput = document.getElementById('horaRecordatorio');
+  const activoInput = document.getElementById('recordatorioActivo');
   
-  localStorage.setItem('racha_healthy_life', JSON.stringify(datosRacha));
+  if (horaInput) datosRacha.recordatorio.hora = horaInput.value;
+  if (activoInput) datosRacha.recordatorio.activo = activoInput.checked;
   
-  const modal = bootstrap.Modal.getInstance(document.getElementById('modalRecordatorio'));
-  modal.hide();
+  guardarDatosRacha();
+  
+  const modalElement = document.getElementById('modalRecordatorio');
+  if (modalElement) {
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    if (modal) modal.hide();
+  }
   
   mostrarMensaje('Recordatorio configurado correctamente', 'success');
 }
 
+function mostrarModalReinicio() {
+  const modalElement = document.getElementById('modalReiniciar');
+  if (!modalElement) return;
+  
+  const modal = new bootstrap.Modal(modalElement);
+  modal.show();
+}
+
+function reiniciarRacha() {
+  datosRacha.diasConsecutivos = 0;
+  datosRacha.diasCompletados = [];
+  datosRacha.fechaUltimoDia = null;
+  
+  guardarDatosRacha();
+  
+  const modalElement = document.getElementById('modalReiniciar');
+  if (modalElement) {
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    if (modal) modal.hide();
+  }
+  
+  actualizarRacha();
+  generarCalendario();
+  actualizarEstadisticas();
+  actualizarHitos();
+  
+  mostrarMensaje('Racha reiniciada correctamente', 'info');
+}
+
 function mostrarMensaje(mensaje, tipo) {
+  // Crear alerta temporal
   const alerta = document.createElement('div');
-  alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
-  alerta.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+  alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+  alerta.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
   alerta.innerHTML = `
     ${mensaje}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -441,17 +611,115 @@ function mostrarMensaje(mensaje, tipo) {
   
   document.body.appendChild(alerta);
   
+  // Remover después de 3 segundos
   setTimeout(() => {
-    if (alerta.parentNode) alerta.remove();
+    if (alerta.parentNode) {
+      alerta.remove();
+    }
   }, 3000);
 }
 </script>
 
 <style>
+.streak-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  padding: 2rem;
+  background: white;
+}
+
+.streak-flame {
+  font-size: 4rem;
+  background: linear-gradient(135deg, #ff6b00, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.calendar-day {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px auto;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  border: 2px solid transparent;
+}
+
+.calendar-day.completed {
+  background: linear-gradient(135deg, #ffd700, #ff6b00);
+  color: white;
+}
+
+.calendar-day.current {
+  background: #198754;
+  color: white;
+  transform: scale(1.1);
+  border-color: #198754;
+}
+
+.calendar-day.missed {
+  background: #dc3545;
+  color: white;
+}
+
+.calendar-day.future {
+  background: #f8f9fa;
+  color: #6c757d;
+  border-color: #e9ecef;
+}
+
 .calendar-day.other-month {
   background: #f8f9fa;
   color: #6c757d;
   opacity: 0.5;
+}
+
+.calendar-day:hover {
+  transform: scale(1.05);
+}
+
+.milestone-badge {
+  border-left: 4px solid #198754;
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.progress {
+  height: 8px;
+  border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .streak-card {
+    padding: 1.5rem;
+  }
+  
+  .calendar-day {
+    width: 35px;
+    height: 35px;
+    font-size: 0.8rem;
+  }
+  
+  .streak-flame {
+    font-size: 3rem;
+  }
+  
+  h1.display-4 {
+    font-size: 2.5rem;
+  }
 }
 </style>
 {% endblock %}
