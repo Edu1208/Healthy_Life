@@ -160,10 +160,11 @@ def register():
             "record_personal": 0,
             "dias_completados": [],
             "fecha_ultimo_dia": None,
-            "hitos": [7, 14, 30, 60, 90],
+            "hitos": [3, 7, 14, 30, 60, 90],
             "recordatorio": {
                 "activo": True,
-                "hora": "19:00"
+                "hora": "19:00",
+                "frecuencia": "diario"
             }
         }
         db.rachas.insert_one(racha_default)
@@ -339,7 +340,46 @@ def actualizar_perfil():
         print(f"Error al actualizar perfil: {e}")
         return jsonify({"success": False, "message": "Error al actualizar el perfil"})
 
-# Gestión de Racha
+# Gestión de Racha - Funciones auxiliares
+def calcular_tasa_exito(dias_completados):
+    if not dias_completados:
+        return 0
+    
+    try:
+        # Convertir strings a datetime objects
+        fechas = [datetime.strptime(d, "%Y-%m-%d") for d in dias_completados]
+        primer_dia = min(fechas)
+        hoy = datetime.now()
+        dias_totales = (hoy - primer_dia).days + 1
+        
+        return round((len(dias_completados) / dias_totales) * 100)
+    except Exception as e:
+        print(f"Error calculando tasa de éxito: {e}")
+        return 0
+
+def calcular_hitos_alcanzados(dias_consecutivos):
+    hitos = [3, 7, 14, 30, 60, 90]
+    return len([h for h in hitos if dias_consecutivos >= h])
+
+def calcular_progreso_mensual(dias_completados):
+    if not dias_completados:
+        return 0
+    
+    try:
+        hoy = datetime.now()
+        mes_actual = hoy.month
+        año_actual = hoy.year
+        
+        dias_mes_actual = [d for d in dias_completados 
+                          if datetime.strptime(d, "%Y-%m-%d").month == mes_actual 
+                          and datetime.strptime(d, "%Y-%m-%d").year == año_actual]
+        
+        return len(dias_mes_actual)
+    except Exception as e:
+        print(f"Error calculando progreso mensual: {e}")
+        return 0
+
+# Gestión de Racha - Rutas principales
 @app.route("/racha")
 def racha():
     if 'user_id' not in session:
@@ -356,10 +396,11 @@ def racha():
             "record_personal": 0,
             "dias_completados": [],
             "fecha_ultimo_dia": None,
-            "hitos": [7, 14, 30, 60, 90],
+            "hitos": [3, 7, 14, 30, 60, 90],
             "recordatorio": {
                 "activo": True,
-                "hora": "19:00"
+                "hora": "19:00",
+                "frecuencia": "diario"
             }
         }
         db.rachas.insert_one(racha_usuario)
@@ -385,8 +426,24 @@ def marcar_dia_racha():
         if hoy_str in racha.get("dias_completados", []):
             return jsonify({"success": False, "message": "Ya has marcado tu entrenamiento para hoy"})
         
+        # Verificar si la racha debe reiniciarse
+        dias_consecutivos = racha.get("dias_consecutivos", 0)
+        fecha_ultimo_dia = racha.get("fecha_ultimo_dia")
+        
+        if fecha_ultimo_dia:
+            # Convertir fecha_ultimo_dia a datetime si es string
+            if isinstance(fecha_ultimo_dia, str):
+                fecha_ultimo_dia = datetime.strptime(fecha_ultimo_dia, "%Y-%m-%d")
+            
+            # Calcular días desde el último registro
+            dias_desde_ultimo = (hoy - fecha_ultimo_dia).days
+            
+            if dias_desde_ultimo > 1:
+                # Se rompió la racha, reiniciar
+                dias_consecutivos = 0
+        
         # Calcular nueva racha
-        nueva_racha = racha.get("dias_consecutivos", 0) + 1
+        nueva_racha = dias_consecutivos + 1
         record_personal = max(racha.get("record_personal", 0), nueva_racha)
         
         # Actualizar racha
@@ -433,7 +490,8 @@ def actualizar_recordatorio_racha():
             {"$set": {
                 "recordatorio": {
                     "activo": data.get("activo", True),
-                    "hora": data.get("hora", "19:00")
+                    "hora": data.get("hora", "19:00"),
+                    "frecuencia": data.get("frecuencia", "diario")
                 }
             }}
         )
@@ -456,8 +514,11 @@ def obtener_datos_racha():
             # Convertir ObjectId a string para JSON
             racha['_id'] = str(racha['_id'])
             racha['usuario_id'] = str(racha['usuario_id'])
+            
+            # Convertir fecha_ultimo_dia si existe
             if 'fecha_ultimo_dia' in racha and racha['fecha_ultimo_dia']:
-                racha['fecha_ultimo_dia'] = racha['fecha_ultimo_dia'].strftime("%Y-%m-%d")
+                if isinstance(racha['fecha_ultimo_dia'], datetime):
+                    racha['fecha_ultimo_dia'] = racha['fecha_ultimo_dia'].strftime("%Y-%m-%d")
             
             return jsonify({"success": True, "racha": racha})
         else:
@@ -467,9 +528,69 @@ def obtener_datos_racha():
         print(f"Error al obtener datos de racha: {e}")
         return jsonify({"success": False, "message": "Error al obtener los datos de racha"})
 
-# Gestión de rutinas (mantener las existentes)
+@app.route("/racha/estadisticas-completas")
+def estadisticas_completas_racha():
+    if 'user_id' not in session:
+        return jsonify({"success": False, "message": "Usuario no autenticado"})
+    
+    try:
+        racha = db.rachas.find_one({"usuario_id": ObjectId(session["user_id"])})
+        usuario = db.usuarios.find_one({"_id": ObjectId(session["user_id"])})
+        
+        if not racha:
+            return jsonify({"success": False, "message": "Racha no encontrada"})
+        
+        # Calcular estadísticas avanzadas
+        estadisticas = {
+            "racha_actual": racha.get("dias_consecutivos", 0),
+            "record_personal": racha.get("record_personal", 0),
+            "total_dias_activos": len(racha.get("dias_completados", [])),
+            "tasa_exito": calcular_tasa_exito(racha.get("dias_completados", [])),
+            "hitos_alcanzados": calcular_hitos_alcanzados(racha.get("dias_consecutivos", 0)),
+            "progreso_mensual": calcular_progreso_mensual(racha.get("dias_completados", [])),
+            "consistencia_semanal": calcular_consistencia_semanal(racha.get("dias_completados", [])),
+            "mejor_racha": racha.get("record_personal", 0),
+            "dias_este_mes": calcular_progreso_mensual(racha.get("dias_completados", []))
+        }
+        
+        return jsonify({"success": True, "estadisticas": estadisticas})
+    
+    except Exception as e:
+        print(f"Error al obtener estadísticas completas: {e}")
+        return jsonify({"success": False, "message": "Error al obtener estadísticas"})
+
+def calcular_consistencia_semanal(dias_completados):
+    if not dias_completados:
+        return 0
+    
+    try:
+        # Calcular consistencia de las últimas 4 semanas
+        hoy = datetime.now()
+        total_semanas = 4
+        dias_por_semana = []
+        
+        for i in range(total_semanas):
+            inicio_semana = hoy - timedelta(days=hoy.weekday() + (7 * i))
+            fin_semana = inicio_semana + timedelta(days=6)
+            
+            dias_semana = [d for d in dias_completados 
+                          if inicio_semana.date() <= datetime.strptime(d, "%Y-%m-%d").date() <= fin_semana.date()]
+            
+            dias_por_semana.append(len(dias_semana))
+        
+        # Calcular promedio de días por semana
+        promedio = sum(dias_por_semana) / total_semanas
+        return round((promedio / 7) * 100)  # Porcentaje de consistencia
+    except Exception as e:
+        print(f"Error calculando consistencia semanal: {e}")
+        return 0
+
+# Gestión de rutinas
 @app.route("/rutinas")
 def rutinas():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
     rutinas_usuario = list(db.rutinas.find({"usuario_id": ObjectId(session["user_id"])}).sort("fecha_creacion", -1))
     return render_template("rutinas.html", rutinas=rutinas_usuario)
 
