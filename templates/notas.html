@@ -1,52 +1,50 @@
 {% extends "base.html" %}
 {% block title %}Mis Notas - Healthy Life{% endblock %}
+
 {% block content %}
 <div class="container py-4">
+
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h1 class="display-5 fw-bold text-success">Mis Notas</h1>
       <p class="lead text-muted">Organiza tus rutinas y progreso</p>
     </div>
-    <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalNuevaNota">
-      <i class="bi bi-plus-circle me-2"></i>Añadir Nota
-    </button>{% extends "base.html" %}
-{% block title %}Mis Notas - Healthy Life{% endblock %}
-{% block content %}
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h1 class="display-5 fw-bold text-success">Mis Notas</h1>
-      <p class="lead text-muted">Organiza tus rutinas y progreso</p>
-    </div>
-    <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalNuevaNota">
+
+    <button class="btn btn-success btn-lg" onclick="abrirModalNuevaNota()">
       <i class="bi bi-plus-circle me-2"></i>Añadir Nota
     </button>
   </div>
 
-  <div class="row g-4" id="listaNotas">
+  <div class="row g-4">
     {% if notas %}
       {% for nota in notas %}
       <div class="col-md-6 col-lg-4">
-        <div class="card note-card">
+        <div class="card note-card h-100">
           <div class="card-body d-flex flex-column">
-            <div class="d-flex justify-content-between align-items-start mb-2">
+            
+            <div class="d-flex justify-content-between mb-2">
               <h5 class="card-title">{{ nota.titulo }}</h5>
-              <span class="badge {% if nota.estado == 'Activa' %}bg-success{% elif nota.estado == 'Completada' %}bg-secondary{% else %}bg-warning{% endif %}">
+              <span class="badge 
+                {% if nota.estado == 'Activa' %}bg-success
+                {% elif nota.estado == 'Completada' %}bg-secondary
+                {% else %}bg-warning{% endif %}">
                 {{ nota.estado }}
               </span>
             </div>
+
             <p class="card-text flex-grow-1">{{ nota.contenido }}</p>
+
             <div class="mt-auto">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <small class="text-muted">
-                  <i class="bi bi-calendar me-1"></i>
-                  {{ nota.fecha_creacion.strftime('%d/%m/%Y') if nota.fecha_creacion else 'Sin fecha' }}
-                </small>
-                <small class="text-muted">
-                  <i class="bi bi-tag me-1"></i>{{ nota.categoria }}
-                </small>
-              </div>
-              <div class="btn-group w-100">
+              <small class="text-muted">
+                <i class="bi bi-calendar me-1"></i>
+                {{ nota.fecha_creacion.strftime('%d/%m/%Y') }}
+              </small>
+              <br>
+              <small class="text-muted">
+                <i class="bi bi-tag me-1"></i>{{ nota.categoria }}
+              </small>
+
+              <div class="btn-group w-100 mt-2">
                 <button class="btn btn-outline-warning btn-sm" onclick="editarNota('{{ nota._id }}')">
                   <i class="bi bi-pencil me-1"></i>Editar
                 </button>
@@ -55,55 +53,45 @@
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       </div>
       {% endfor %}
+    
     {% else %}
-    <div class="col-12 text-center py-5">
-      <i class="bi bi-inbox display-1 text-muted"></i>
-      <h4 class="text-muted mt-3">No hay notas registradas</h4>
-      <p class="text-muted">Crea tu primera nota para verla aquí.</p>
-    </div>
+      <div class="col-12 text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <h4 class="text-muted mt-3">No hay notas registradas</h4>
+        <p class="text-muted">Crea tu primera nota para verla aquí.</p>
+      </div>
     {% endif %}
   </div>
 
-  <!-- Card para nueva nota -->
-  <div class="row mt-4">
-    <div class="col-md-6 col-lg-4">
-      <div class="card note-card border-dashed">
-        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-5" 
-             style="cursor: pointer;" onclick="abrirModalNuevaNota()">
-          <i class="bi bi-plus-circle display-4 text-muted mb-3"></i>
-          <h5 class="text-muted">Crear Nueva Nota</h5>
-          <p class="text-muted">Organiza tu próximo entrenamiento o plan</p>
-          <button class="btn btn-outline-success mt-2">
-            <i class="bi bi-plus me-1"></i>Añadir
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
-<!-- Modal para Nueva Nota -->
+<!-- Modal Nueva o Editar -->
 <div class="modal fade" id="modalNuevaNota" tabindex="-1">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
+
       <div class="modal-header">
         <h5 class="modal-title" id="modalNotaTitulo">Crear Nueva Nota</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
+
       <div class="modal-body">
         <form id="formNota">
           <div class="mb-3">
             <label class="form-label">Título *</label>
             <input type="text" class="form-control" id="notaTitulo" required>
           </div>
+
           <div class="mb-3">
             <label class="form-label">Contenido</label>
             <textarea class="form-control" id="notaContenido" rows="4"></textarea>
           </div>
+
           <div class="row">
             <div class="col-md-6">
               <label class="form-label">Categoría</label>
@@ -115,6 +103,7 @@
                 <option value="Progreso">Progreso</option>
               </select>
             </div>
+
             <div class="col-md-6">
               <label class="form-label">Estado</label>
               <select class="form-select" id="notaEstado">
@@ -124,12 +113,15 @@
               </select>
             </div>
           </div>
+
         </form>
       </div>
+
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-success" onclick="guardarNota()">Guardar Nota</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-success" onclick="guardarNota()">Guardar</button>
       </div>
+
     </div>
   </div>
 </div>
@@ -142,109 +134,59 @@ let notaEditando = null;
 
 function abrirModalNuevaNota() {
   notaEditando = null;
-  document.getElementById('modalNotaTitulo').textContent = 'Crear Nueva Nota';
-  document.getElementById('formNota').reset();
-  const modal = new bootstrap.Modal(document.getElementById('modalNuevaNota'));
-  modal.show();
+  document.getElementById("modalNotaTitulo").textContent = "Crear Nueva Nota";
+  document.getElementById("formNota").reset();
+  new bootstrap.Modal(document.getElementById('modalNuevaNota')).show();
 }
 
 function editarNota(id) {
-  // En una implementación real, aquí cargarías los datos de la nota desde el servidor
-  // Por ahora, usaremos los datos de la plantilla
   notaEditando = id;
-  document.getElementById('modalNotaTitulo').textContent = 'Editar Nota';
+  document.getElementById("modalNotaTitulo").textContent = "Editar Nota";
+
+  // Tomar valores desde la tarjeta
+  const card = document.querySelector(`button[onclick="editarNota('${id}')"]`).closest(".card");
+
+  document.getElementById("notaTitulo").value = card.querySelector(".card-title").textContent.trim();
+  document.getElementById("notaContenido").value = card.querySelector(".card-text").textContent.trim();
+  document.getElementById("notaCategoria").value =
+      card.querySelector(".bi-tag").parentElement.textContent.trim().replace(" ", "");
   
-  // En una implementación completa, harías una petición al servidor para obtener los datos
-  // Por simplicidad, asumimos que los datos están en la página
-  const modal = new bootstrap.Modal(document.getElementById('modalNuevaNota'));
-  modal.show();
+  new bootstrap.Modal(document.getElementById('modalNuevaNota')).show();
 }
 
 function guardarNota() {
-  const titulo = document.getElementById('notaTitulo').value.trim();
-  const contenido = document.getElementById('notaContenido').value.trim();
-  const categoria = document.getElementById('notaCategoria').value;
-  const estado = document.getElementById('notaEstado').value;
-
-  if (!titulo) {
-    mostrarMensaje('Por favor ingresa un título para la nota.', 'warning');
-    return;
-  }
-
-  const datosNota = {
-    titulo: titulo,
-    contenido: contenido,
-    categoria: categoria,
-    estado: estado
+  const datos = {
+    titulo: document.getElementById("notaTitulo").value,
+    contenido: document.getElementById("notaContenido").value,
+    categoria: document.getElementById("notaCategoria").value,
+    estado: document.getElementById("notaEstado").value
   };
 
-  const url = notaEditando ? `/nota/editar/${notaEditando}` : '/nota/nueva';
-  const method = 'POST';
+  const url = notaEditando ? `/nota/editar/${notaEditando}` : "/nota/nueva";
 
   fetch(url, {
-    method: method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(datosNota)
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(datos)
   })
-  .then(response => response.json())
+  .then(res => res.json())
   .then(data => {
     if (data.success) {
-      mostrarMensaje(data.message, 'success');
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      location.reload();
     } else {
-      mostrarMensaje(data.message, 'danger');
+      alert(data.message);
     }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    mostrarMensaje('Error al guardar la nota', 'danger');
   });
 }
 
 function eliminarNota(id) {
-  if (confirm('¿Estás seguro de que quieres eliminar esta nota? Esta acción no se puede deshacer.')) {
-    fetch(`/nota/eliminar/${id}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        mostrarMensaje(data.message, 'success');
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } else {
-        mostrarMensaje(data.message, 'danger');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      mostrarMensaje('Error al eliminar la nota', 'danger');
-    });
-  }
-}
+  if (!confirm("¿Eliminar esta nota?")) return;
 
-function mostrarMensaje(mensaje, tipo) {
-  const alerta = document.createElement('div');
-  alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
-  alerta.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
-  alerta.innerHTML = `
-    ${mensaje}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  `;
-  
-  document.body.appendChild(alerta);
-  
-  setTimeout(() => {
-    if (alerta.parentNode) alerta.remove();
-  }, 3000);
+  fetch(`/nota/eliminar/${id}`, {method: "POST"})
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) location.reload();
+    });
 }
 </script>
 
@@ -253,314 +195,11 @@ function mostrarMensaje(mensaje, tipo) {
   border: none;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  transition: all 0.3s ease;
-  height: 100%;
+  transition: .3s ease;
 }
-
 .note-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0,0,0,0.1);
 }
-
-.border-dashed {
-  border: 2px dashed #dee2e6 !important;
-}
-
-.border-dashed:hover {
-  border-color: #198754 !important;
-}
 </style>
 {% endblock %}
-  </div>
-
-  <div class="row g-4" id="listaNotas">
-    <!-- Las notas se cargarán dinámicamente -->
-  </div>
-</div>
-
-<!-- Modal para Nueva Nota -->
-<div class="modal fade" id="modalNuevaNota" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Crear Nueva Nota</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form id="formNuevaNota">
-          <div class="mb-3">
-            <label class="form-label">Título *</label>
-            <input type="text" class="form-control" id="notaTitulo" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Descripción</label>
-            <textarea class="form-control" id="notaDescripcion" rows="3"></textarea>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Categoría</label>
-            <select class="form-select" id="notaCategoria">
-              <option value="Fuerza">Fuerza</option>
-              <option value="Cardio">Cardio</option>
-              <option value="Nutrición">Nutrición</option>
-              <option value="Progreso">Progreso</option>
-              <option value="General">General</option>
-            </select>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-success" onclick="guardarNota()">Guardar Nota</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-{% endblock %}
-
-{% block scripts %}
-<script>
-let notaEditando = null;
-
-// Cargar notas al iniciar
-document.addEventListener('DOMContentLoaded', function() {
-  cargarNotas();
-});
-
-function cargarNotas() {
-  fetch('/notas/listar')
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        mostrarNotas(data.notas);
-      } else {
-        mostrarMensaje('Error al cargar las notas', 'danger');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      mostrarMensaje('Error al cargar las notas', 'danger');
-    });
-}
-
-function mostrarNotas(notas) {
-  const listaNotas = document.getElementById('listaNotas');
-  listaNotas.innerHTML = '';
-
-  if (notas.length === 0) {
-    listaNotas.innerHTML = `
-      <div class="col-12 text-center py-5">
-        <i class="bi bi-inbox display-1 text-muted"></i>
-        <h4 class="text-muted mt-3">No hay notas</h4>
-        <p class="text-muted">Crea tu primera nota para organizar tus rutinas.</p>
-      </div>
-    `;
-    return;
-  }
-
-  notas.forEach(nota => {
-    const categoriaColor = getCategoriaColor(nota.categoria);
-    
-    const notaHTML = `
-      <div class="col-md-6 col-lg-4">
-        <div class="card note-card h-100">
-          <div class="card-header bg-${categoriaColor} text-white">
-            <div class="d-flex justify-content-between align-items-center">
-              <h6 class="card-title mb-0">${nota.titulo}</h6>
-              <span class="badge bg-light text-dark">${nota.categoria}</span>
-            </div>
-          </div>
-          <div class="card-body d-flex flex-column">
-            <p class="card-text flex-grow-1">${nota.descripcion || 'Sin descripción'}</p>
-            <div class="mt-auto">
-              <small class="text-muted">
-                <i class="bi bi-calendar me-1"></i>
-                ${new Date(nota.fecha_creacion).toLocaleDateString('es-ES')}
-              </small>
-              <div class="btn-group w-100 mt-2">
-                <button class="btn btn-outline-warning btn-sm" onclick="editarNota('${nota._id}')">
-                  <i class="bi bi-pencil me-1"></i>Editar
-                </button>
-                <button class="btn btn-outline-danger btn-sm" onclick="eliminarNota('${nota._id}')">
-                  <i class="bi bi-trash me-1"></i>Eliminar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    listaNotas.innerHTML += notaHTML;
-  });
-
-  // Agregar card para nueva nota
-  listaNotas.innerHTML += `
-    <div class="col-md-6 col-lg-4">
-      <div class="card note-card border-dashed h-100">
-        <div class="card-body d-flex flex-column justify-content-center align-items-center text-center py-5" 
-             style="cursor: pointer;" 
-             onclick="abrirModalNuevaNota()">
-          <i class="bi bi-plus-circle display-4 text-muted mb-3"></i>
-          <h5 class="text-muted">Crear Nueva Nota</h5>
-          <p class="text-muted">Organiza tu próximo entrenamiento o plan</p>
-          <button class="btn btn-outline-success mt-2">
-            <i class="bi bi-plus me-1"></i>Añadir
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function abrirModalNuevaNota() {
-  notaEditando = null;
-  document.getElementById('formNuevaNota').reset();
-  const modal = new bootstrap.Modal(document.getElementById('modalNuevaNota'));
-  modal.show();
-}
-
-function guardarNota() {
-  const titulo = document.getElementById('notaTitulo').value.trim();
-  const descripcion = document.getElementById('notaDescripcion').value.trim();
-  const categoria = document.getElementById('notaCategoria').value;
-
-  if (!titulo) {
-    mostrarMensaje('Por favor ingresa un título para la nota.', 'warning');
-    return;
-  }
-
-  const notaData = {
-    titulo: titulo,
-    descripcion: descripcion,
-    categoria: categoria
-  };
-
-  let url = '/notas/crear';
-  let method = 'POST';
-
-  if (notaEditando) {
-    url = `/notas/editar/${notaEditando}`;
-    method = 'PUT';
-  }
-
-  fetch(url, {
-    method: method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(notaData)
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevaNota'));
-      modal.hide();
-      cargarNotas();
-      mostrarMensaje(notaEditando ? 'Nota actualizada correctamente' : 'Nota creada correctamente', 'success');
-    } else {
-      mostrarMensaje(data.message, 'danger');
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    mostrarMensaje('Error al guardar la nota', 'danger');
-  });
-}
-
-function editarNota(id) {
-  fetch(`/notas/obtener/${id}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        const nota = data.nota;
-        notaEditando = id;
-        
-        document.getElementById('notaTitulo').value = nota.titulo;
-        document.getElementById('notaDescripcion').value = nota.descripcion || '';
-        document.getElementById('notaCategoria').value = nota.categoria;
-        
-        const modal = new bootstrap.Modal(document.getElementById('modalNuevaNota'));
-        modal.show();
-      } else {
-        mostrarMensaje(data.message, 'danger');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      mostrarMensaje('Error al cargar la nota', 'danger');
-    });
-}
-
-function eliminarNota(id) {
-  if (confirm('¿Estás seguro de que quieres eliminar esta nota? Esta acción no se puede deshacer.')) {
-    fetch(`/notas/eliminar/${id}`, {
-      method: 'DELETE'
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        cargarNotas();
-        mostrarMensaje('Nota eliminada correctamente', 'success');
-      } else {
-        mostrarMensaje(data.message, 'danger');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      mostrarMensaje('Error al eliminar la nota', 'danger');
-    });
-  }
-}
-
-// Funciones auxiliares
-function getCategoriaColor(categoria) {
-  const colores = {
-    'Fuerza': 'primary',
-    'Cardio': 'danger',
-    'Nutrición': 'success',
-    'Progreso': 'info',
-    'General': 'secondary'
-  };
-  return colores[categoria] || 'secondary';
-}
-
-function mostrarMensaje(mensaje, tipo) {
-  const alerta = document.createElement('div');
-  alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
-  alerta.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
-  alerta.innerHTML = `
-    ${mensaje}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  `;
-  
-  document.body.appendChild(alerta);
-  
-  setTimeout(() => {
-    if (alerta.parentNode) alerta.remove();
-  }, 3000);
-}
-</script>
-
-<style>
-.note-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border: none;
-  border-radius: 12px;
-}
-
-.note-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-}
-
-.border-dashed {
-  border: 2px dashed #dee2e6 !important;
-}
-
-.border-dashed:hover {
-  border-color: #198754 !important;
-}
-</style>
-{% endblock %}
-
