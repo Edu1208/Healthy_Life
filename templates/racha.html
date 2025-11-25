@@ -1,1410 +1,460 @@
+#comentario --- BLOQUE 1 ---
+
 {% extends "base.html" %}
 {% block title %}Mi Racha - Healthy Life{% endblock %}
+
 {% block content %}
 <div class="container py-4">
-  <!-- Header Principal de Racha -->
+  <!-- Header de Racha -->
   <div class="row justify-content-center mb-5">
-    <div class="col-lg-10">
-      <div class="streak-hero-card text-center position-relative overflow-hidden">
-        <div class="streak-background"></div>
-        <div class="position-relative z-2 py-5">
-          <div class="streak-flame-container mb-4">
-            <div class="streak-flame-main">
-              <i class="bi bi-fire"></i>
-            </div>
-            {% if racha and racha.dias_consecutivos >= 7 %}
-            <div class="flame-particles">
-              <div class="particle particle-1"></div>
-              <div class="particle particle-2"></div>
-              <div class="particle particle-3"></div>
-            </div>
-            {% endif %}
-          </div>
-          
-          <h1 class="display-2 fw-bold text-white mb-2 streak-counter" id="diasConsecutivos">
-            {{ racha.dias_consecutivos if racha else 0 }}
-          </h1>
-          <h3 class="text-white mb-3">Días Consecutivos</h3>
-          
-          <!-- Mensaje Motivacional Dinámico -->
-          <div class="motivational-message mb-4">
-            <p class="lead text-white" id="mensajeRacha">
-              {% if not racha or racha.dias_consecutivos == 0 %}
-              <i class="bi bi-rocket-takeoff me-2"></i>¡Comienza tu aventura fitness hoy!
-              {% elif racha.dias_consecutivos < 3 %}
-              <i class="bi bi-emoji-smile me-2"></i>¡Buen comienzo! Sigue así.
-              {% elif racha.dias_consecutivos < 7 %}
-              <i class="bi bi-star me-2"></i>¡Vas por buen camino! Constancia es clave.
-              {% elif racha.dias_consecutivos < 14 %}
-              <i class="bi bi-lightning me-2"></i>¡Impresionante! Una semana completa.
-              {% elif racha.dias_consecutivos < 30 %}
-              <i class="bi bi-trophy me-2"></i>¡Espectacular! Más de dos semanas.
-              {% else %}
-              <i class="bi bi-award me-2"></i>¡Leyenda! Más de un mes de consistencia.
-              {% endif %}
-            </p>
-          </div>
+    <div class="col-lg-8">
+      <div class="streak-card bg-white p-4 text-center">
+        <div class="streak-flame mb-3">
+          <i class="bi bi-fire"></i>
+        </div>
 
-          <!-- Estadísticas Principales -->
-          <div class="row justify-content-center">
-            <div class="col-md-3 col-6 mb-3">
-              <div class="stat-card">
-                <div class="stat-icon text-success">
-                  <i class="bi bi-fire"></i>
-                </div>
-                <h4 class="stat-number text-white mb-1" id="rachaActual">{{ racha.dias_consecutivos if racha else 0 }}</h4>
-                <small class="text-white-50">Racha Actual</small>
-              </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="stat-card">
-                <div class="stat-icon text-primary">
-                  <i class="bi bi-graph-up-arrow"></i>
-                </div>
-                <h4 class="stat-number text-white mb-1" id="recordPersonal">{{ racha.record_personal if racha else 0 }}</h4>
-                <small class="text-white-50">Récord Personal</small>
-              </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="stat-card">
-                <div class="stat-icon text-info">
-                  <i class="bi bi-calendar-check"></i>
-                </div>
-                <h4 class="stat-number text-white mb-1" id="totalDias">{{ racha.dias_completados|length if racha and racha.dias_completados else 0 }}</h4>
-                <small class="text-white-50">Días Activos</small>
-              </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="stat-card">
-                <div class="stat-icon text-warning">
-                  <i class="bi bi-percent"></i>
-                </div>
-                <h4 class="stat-number text-white mb-1" id="tasaExito">0%</h4>
-                <small class="text-white-50">Tasa de Éxito</small>
-              </div>
-            </div>
-          </div>
+        <h1 class="display-4 fw-bold text-warning mb-2" id="diasConsecutivos">0</h1>
+        <h3 class="text-dark mb-3">Días Consecutivos</h3>
 
-          <!-- Botón de Acción Principal -->
-          <div class="mt-4">
-            <button class="btn btn-lg btn-success glow-button" onclick="marcarDiaHoy()" id="btnMarcarHoy">
-              <i class="bi bi-check-circle me-2"></i>
-              <span id="btnTexto">Marcar Día de Hoy</span>
-            </button>
+        <p class="text-muted mb-4" id="mensajeRacha">Cargando tu progreso...</p>
+
+        <div class="row text-center">
+          <div class="col-4 border-end">
+            <h4 class="text-success mb-1" id="rachaActual">0</h4>
+            <small class="text-muted">Racha Actual</small>
+          </div>
+          <div class="col-4 border-end">
+            <h4 class="text-primary mb-1" id="recordPersonal">0</h4>
+            <small class="text-muted">Récord Personal</small>
+          </div>
+          <div class="col-4">
+            <h4 class="text-info mb-1" id="tasaExito">0%</h4>
+            <small class="text-muted">Tasa de éxito</small>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 
   <div class="row g-4">
-    <!-- Sección Izquierda: Calendario y Progreso -->
+
+    <!-- Calendario -->
     <div class="col-lg-8">
-      <!-- Calendario de Progreso -->
-      <div class="streak-section-card">
-        <div class="section-header">
-          <div class="d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">
-              <i class="bi bi-calendar3 text-primary me-2"></i>Calendario de Progreso
-            </h4>
-            <div class="d-flex align-items-center">
-              <button class="btn btn-sm btn-outline-secondary me-2" onclick="cambiarMes(-1)" id="btnMesAnterior">
-                <i class="bi bi-chevron-left"></i>
-              </button>
-              <span class="badge bg-success fs-6" id="mesActual">Cargando...</span>
-              <button class="btn btn-sm btn-outline-secondary ms-2" onclick="cambiarMes(1)" id="btnMesSiguiente">
-                <i class="bi bi-chevron-right"></i>
-              </button>
+      <div class="streak-card bg-white p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="mb-0"><i class="bi bi-calendar3 text-primary me-2"></i>Calendario</h4>
+          <span class="badge bg-success" id="mesActual">Cargando...</span>
+        </div>
+
+        <!-- Días semana -->
+        <div class="row text-center mb-2">
+          <div class="col fw-bold text-muted">L</div>
+          <div class="col fw-bold text-muted">M</div>
+          <div class="col fw-bold text-muted">M</div>
+          <div class="col fw-bold text-muted">J</div>
+          <div class="col fw-bold text-muted">V</div>
+          <div class="col fw-bold text-muted">S</div>
+          <div class="col fw-bold text-muted">D</div>
+        </div>
+
+        <div id="calendarioContainer"></div>
+
+        <!-- Leyenda -->
+        <div class="row text-center mt-4">
+          <div class="col">
+            <div class="d-flex justify-content-center align-items-center">
+              <div class="calendar-square bg-success me-2"></div>
+              <span>Completado</span>
+            </div>
+          </div>
+          <div class="col">
+            <div class="d-flex justify-content-center align-items-center">
+              <div class="calendar-square border border-primary me-2"></div>
+              <span>Hoy</span>
+            </div>
+          </div>
+          <div class="col">
+            <div class="d-flex justify-content-center align-items-center">
+              <div class="calendar-square bg-light me-2"></div>
+              <span>Próximo</span>
             </div>
           </div>
         </div>
 
-        <!-- Días de la semana -->
-        <div class="calendar-weekdays mb-3">
-          <div class="weekday"><small class="fw-bold text-muted">Lun</small></div>
-          <div class="weekday"><small class="fw-bold text-muted">Mar</small></div>
-          <div class="weekday"><small class="fw-bold text-muted">Mié</small></div>
-          <div class="weekday"><small class="fw-bold text-muted">Jue</small></div>
-          <div class="weekday"><small class="fw-bold text-muted">Vie</small></div>
-          <div class="weekday"><small class="fw-bold text-muted">Sáb</small></div>
-          <div class="weekday"><small class="fw-bold text-muted">Dom</small></div>
-        </div>
-
-        <!-- Contenedor del Calendario -->
-        <div id="calendarioContainer" class="calendar-grid">
-          <!-- El calendario se generará dinámicamente -->
-        </div>
-
-        <!-- Leyenda del Calendario -->
-        <div class="calendar-legend mt-4">
-          <div class="row text-center">
-            <div class="col-md-3">
-              <div class="legend-item">
-                <div class="legend-color completed"></div>
-                <small>Completado</small>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="legend-item">
-                <div class="legend-color current"></div>
-                <small>Hoy</small>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="legend-item">
-                <div class="legend-color future"></div>
-                <small>Próximo</small>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="legend-item">
-                <div class="legend-color missed"></div>
-                <small>Perdido</small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Gráfico de Progreso Mensual -->
-      <div class="streak-section-card mt-4">
-        <div class="section-header">
-          <h4 class="mb-0">
-            <i class="bi bi-graph-up text-success me-2"></i>Progreso Mensual
-          </h4>
-        </div>
-        <div class="progress-bars-container">
-          <div class="progress-item">
-            <div class="d-flex justify-content-between mb-1">
-              <small>Consistencia</small>
-              <small id="consistenciaMensual">0%</small>
-            </div>
-            <div class="progress">
-              <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
-                   id="barraConsistencia" style="width: 0%"></div>
-            </div>
-          </div>
-          <div class="progress-item">
-            <div class="d-flex justify-content-between mb-1">
-              <small>Días Activos</small>
-              <small id="diasActivos">0/0</small>
-            </div>
-            <div class="progress">
-              <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" 
-                   id="barraDiasActivos" style="width: 0%"></div>
-            </div>
-          </div>
-          <div class="progress-item">
-            <div class="d-flex justify-content-between mb-1">
-              <small>Metas Alcanzadas</small>
-              <small id="metasAlcanzadas">0/0</small>
-            </div>
-            <div class="progress">
-              <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" 
-                   id="barraMetas" style="width: 0%"></div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
-    <!-- Sección Derecha: Hitos y Acciones -->
+    <!-- Tarjetas adicionales -->
     <div class="col-lg-4">
-      <!-- Próximos Hitos -->
-      <div class="streak-section-card">
-        <div class="section-header">
-          <h5 class="mb-0">
-            <i class="bi bi-flag text-success me-2"></i>Próximos Hitos
-          </h5>
-        </div>
-        <div id="listaHitos" class="milestones-container">
-          <!-- Los hitos se cargarán dinámicamente -->
-        </div>
+
+      <!-- Hitos -->
+      <div class="streak-card bg-white p-4 mb-4">
+        <h5 class="mb-3"><i class="bi bi-flag text-success me-2"></i>Próximos Hitos</h5>
+        <div id="listaHitos">Cargando...</div>
       </div>
 
-      <!-- Logros Desbloqueados -->
-      <div class="streak-section-card mt-4">
-        <div class="section-header">
-          <h5 class="mb-0">
-            <i class="bi bi-trophy text-warning me-2"></i>Logros
-          </h5>
+      <!-- Estadísticas -->
+      <div class="streak-card bg-white p-4">
+        <h5 class="mb-3"><i class="bi bi-graph-up text-info me-2"></i>Estadísticas</h5>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <small>Consistencia mensual</small>
+            <small id="consistenciaMensual">0%</small>
+          </div>
+          <div class="progress" style="height:5px;">
+            <div class="progress-bar bg-success" id="barraConsistencia" style="width:0%"></div>
+          </div>
         </div>
-        <div id="listaLogros" class="achievements-container">
-          <!-- Los logros se cargarán dinámicamente -->
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <small>Días activos</small>
+            <small id="diasActivos">0</small>
+          </div>
+          <div class="progress" style="height:5px;">
+            <div class="progress-bar bg-primary" id="barraDiasActivos" style="width:0%"></div>
+          </div>
         </div>
+
       </div>
 
-      <!-- Acciones Rápidas -->
-      <div class="streak-section-card mt-4">
-        <div class="section-header">
-          <h5 class="mb-0">
-            <i class="bi bi-lightning text-primary me-2"></i>Acciones Rápidas
-          </h5>
-        </div>
-        <div class="actions-container">
-          <button class="btn btn-outline-success w-100 mb-2" onclick="marcarDiaHoy()">
-            <i class="bi bi-check-circle me-2"></i>Marcar Hoy
-          </button>
-          <button class="btn btn-outline-primary w-100 mb-2" onclick="compartirRacha()">
-            <i class="bi bi-share me-2"></i>Compartir Racha
-          </button>
-          <button class="btn btn-outline-info w-100 mb-2" onclick="configurarRecordatorio()">
-            <i class="bi bi-bell me-2"></i>Recordatorios
-          </button>
-          <button class="btn btn-outline-warning w-100" onclick="verEstadisticasCompletas()">
-            <i class="bi bi-graph-up-arrow me-2"></i>Estadísticas Completas
-          </button>
-        </div>
+      <!-- Acciones -->
+      <div class="streak-card bg-white p-4 mt-4">
+        <h5 class="mb-3"><i class="bi bi-lightning-charge text-warning me-2"></i>Acciones</h5>
+
+        <button class="btn btn-success w-100 mb-2" onclick="marcarHoy()">
+          <i class="bi bi-check-circle me-2"></i>Marcar Hoy
+        </button>
+
+        <button class="btn btn-outline-info w-100" onclick="abrirModalRecordatorio()">
+          <i class="bi bi-bell me-2"></i>Recordatorios
+        </button>
+
       </div>
 
-      <!-- Tips de Motivación -->
-      <div class="streak-section-card mt-4">
-        <div class="section-header">
-          <h5 class="mb-0">
-            <i class="bi bi-lightbulb text-info me-2"></i>Tip del Día
-          </h5>
-        </div>
-        <div class="tip-content">
-          <p id="tipDelDia" class="mb-0">La consistencia es más importante que la intensidad. ¡Pequeños pasos diarios llevan a grandes resultados!</p>
-        </div>
-      </div>
     </div>
   </div>
 </div>
 
-<!-- Modal de Configuración de Recordatorio -->
+<!-- Modal Recordatorio -->
 <div class="modal fade" id="modalRecordatorio" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="bi bi-bell text-primary me-2"></i>Configurar Recordatorio
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title">Configurar Recordatorio</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label fw-medium">Hora del recordatorio</label>
-          <input type="time" class="form-control" id="horaRecordatorio" 
-                 value="{{ racha.recordatorio.hora if racha and racha.recordatorio else '19:00' }}">
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-medium">Frecuencia</label>
-          <select class="form-select" id="frecuenciaRecordatorio">
-            <option value="diario" selected>Diario</option>
-            <option value="lunes_viernes">Lunes a Viernes</option>
-            <option value="fin_semana">Fin de Semana</option>
-          </select>
-        </div>
-        <div class="form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="recordatorioActivo" 
-                 {% if racha and racha.recordatorio and racha.recordatorio.activo %}checked{% endif %}>
-          <label class="form-check-label" for="recordatorioActivo">
-            Recordatorio activo
-          </label>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-success" onclick="guardarRecordatorio()">
-          <i class="bi bi-check-lg me-1"></i>Guardar
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- Modal de Estadísticas Completas -->
-<div class="modal fade" id="modalEstadisticas" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="bi bi-graph-up-arrow text-success me-2"></i>Estadísticas Completas
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
       <div class="modal-body">
-        <div class="row">
-          <div class="col-md-6">
-            <div class="stat-card-modal">
-              <h6>Racha Actual</h6>
-              <h3 class="text-success" id="modalRachaActual">0</h3>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="stat-card-modal">
-              <h6>Récord Personal</h6>
-              <h3 class="text-primary" id="modalRecordPersonal">0</h3>
-            </div>
-          </div>
-        </div>
-        <div class="row mt-3">
-          <div class="col-md-6">
-            <div class="stat-card-modal">
-              <h6>Total de Días Activos</h6>
-              <h3 class="text-info" id="modalTotalDias">0</h3>
-            </div>
-          </div>
-          <div class="col-md-6">
-            <div class="stat-card-modal">
-              <h6>Tasa de Éxito</h6>
-              <h3 class="text-warning" id="modalTasaExito">0%</h3>
-            </div>
-          </div>
-        </div>
-        <div class="mt-4">
-          <h6>Progreso por Mes</h6>
-          <div id="graficoMensual" class="mt-3">
-            <!-- Gráfico se generará dinámicamente -->
-          </div>
+        <label class="form-label">Hora</label>
+        <input type="time" class="form-control" id="recordatorioHora">
+
+        <div class="form-check mt-3">
+          <input class="form-check-input" type="checkbox" id="recordatorioActivo">
+          <label class="form-check-label">Recordatorio activo</label>
         </div>
       </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button class="btn btn-success" onclick="guardarRecordatorio()">Guardar</button>
+      </div>
+
     </div>
   </div>
 </div>
 
 {% endblock %}
+#comentario --- BLOQUE 2 ---
 
 {% block scripts %}
 <script>
-// Variables globales
-let datosRacha = {{ racha|tojson if racha else '{}' }};
-let mesActual = new Date();
-let tipsMotivacionales = [
-  "¡Cada día cuenta! Pequeños pasos llevan a grandes resultados.",
-  "La consistencia es la clave del éxito. ¡Sigue adelante!",
-  "Hoy es un buen día para ser mejor que ayer.",
-  "El esfuerzo de hoy es la recompensa de mañana.",
-  "No te rindas. Generalmente es la última llave la que abre la puerta.",
-  "Tu único límite es tu mente. ¡Sigue desafiándote!",
-  "El progreso, no la perfección. ¡Celebra cada avance!",
-  "Los hábitos se construyen día a día. ¡Tú puedes!",
-  "La disciplina tarde o temprano vencerá a la inteligencia.",
-  "Hoy es tu oportunidad de construir el mañana que deseas."
-];
 
-// Inicialización
-document.addEventListener('DOMContentLoaded', function() {
-  if (Object.keys(datosRacha).length === 0) {
-    cargarDatosRacha();
-  } else {
-    inicializarRacha();
-  }
-  
-  // Mostrar tip aleatorio
-  mostrarTipAleatorio();
+let datos = {
+  diasConsecutivos: 0,
+  recordPersonal: 0,
+  diasCompletados: [],
+  fechaUltimoDia: null,
+  hitos: [3,7,14,30,60,100],
+  recordatorio: { hora: "19:00", activo: true }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  cargarRacha();
 });
 
-function inicializarRacha() {
-  actualizarRacha();
-  generarCalendario();
-  actualizarEstadisticas();
-  actualizarHitos();
-  actualizarLogros();
-  verificarEstadoHoy();
-}
 
-function cargarDatosRacha() {
-  fetch('/racha/datos')
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        datosRacha = data.racha;
-        inicializarRacha();
-      } else {
-        console.error('Error al cargar datos de racha:', data.message);
-        mostrarMensaje('Error al cargar los datos de racha', 'danger');
-      }
-    })
-    .catch(error => {
-      console.error('Error al cargar datos de racha:', error);
-      mostrarMensaje('Error de conexión al cargar la racha', 'danger');
-    });
-}
+/* =============================
+   🔥 CARGAR Racha desde Flask
+============================= */
+async function cargarRacha() {
+  try {
+    const r = await fetch("/racha/datos");
+    const data = await r.json();
 
-function actualizarRacha() {
-  const diasConsecutivos = datosRacha.dias_consecutivos || 0;
-  
-  // Actualizar contadores
-  document.getElementById('diasConsecutivos').textContent = diasConsecutivos;
-  document.getElementById('rachaActual').textContent = diasConsecutivos;
-  document.getElementById('recordPersonal').textContent = datosRacha.record_personal || 0;
-  document.getElementById('totalDias').textContent = datosRacha.dias_completados ? datosRacha.dias_completados.length : 0;
-  
-  // Actualizar tasa de éxito
-  const tasaExito = calcularTasaExito();
-  document.getElementById('tasaExito').textContent = tasaExito + '%';
-  
-  // Actualizar mensaje motivacional
-  actualizarMensajeMotivacional(diasConsecutivos);
-  
-  // Actualizar animaciones basadas en la racha
-  actualizarAnimacionesRacha(diasConsecutivos);
-}
-
-function actualizarMensajeMotivacional(dias) {
-  const mensajes = {
-    0: '<i class="bi bi-rocket-takeoff me-2"></i>¡Comienza tu aventura fitness hoy!',
-    1: '<i class="bi bi-emoji-smile me-2"></i>¡Buen comienzo! Sigue así.',
-    2: '<i class="bi bi-star me-2"></i>¡Vas por buen camino! Constancia es clave.',
-    7: '<i class="bi bi-lightning me-2"></i>¡Impresionante! Una semana completa.',
-    14: '<i class="bi bi-trophy me-2"></i>¡Espectacular! Más de dos semanas.',
-    30: '<i class="bi bi-award me-2"></i>¡Leyenda! Más de un mes de consistencia.'
-  };
-  
-  let mensaje = mensajes[0];
-  for (const [diasKey, msg] of Object.entries(mensajes)) {
-    if (dias >= parseInt(diasKey)) {
-      mensaje = msg;
+    if (!data.success) {
+      mostrarMensaje("Error cargando racha", "danger");
+      return;
     }
-  }
-  
-  document.getElementById('mensajeRacha').innerHTML = mensaje;
-}
 
-function actualizarAnimacionesRacha(dias) {
-  const flameContainer = document.querySelector('.streak-flame-container');
-  const counter = document.querySelector('.streak-counter');
-  
-  // Resetear animaciones
-  flameContainer.classList.remove('flame-burn', 'flame-super-burn');
-  counter.classList.remove('pulse-animation', 'super-pulse');
-  
-  // Aplicar animaciones basadas en días
-  if (dias >= 7) {
-    flameContainer.classList.add('flame-burn');
-    counter.classList.add('pulse-animation');
-  }
-  
-  if (dias >= 30) {
-    flameContainer.classList.add('flame-super-burn');
-    counter.classList.add('super-pulse');
+    const racha = data.racha;
+
+    datos.diasConsecutivos = racha.dias_consecutivos || 0;
+    datos.recordPersonal = racha.record_personal || 0;
+    datos.diasCompletados = racha.dias_completados || [];
+    datos.fechaUltimoDia = racha.fecha_ultimo_dia || null;
+    datos.recordatorio = racha.recordatorio || datos.recordatorio;
+
+    actualizarVistaRacha();
+    generarCalendario();
+    actualizarHitos();
+    actualizarEstadisticas();
+
+  } catch (e) {
+    mostrarMensaje("Error de servidor", "danger");
   }
 }
 
-function marcarDiaHoy() {
-  const btn = document.getElementById('btnMarcarHoy');
-  const btnTexto = document.getElementById('btnTexto');
-  
-  // Mostrar estado de carga
-  btn.disabled = true;
-  btnTexto.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Marcando...';
-  
-  fetch('/racha/marcar-dia', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      mostrarMensaje(data.message, 'success');
-      
-      // Actualizar datos locales
-      datosRacha.dias_consecutivos = data.nueva_racha;
-      datosRacha.record_personal = data.record_personal;
-      
-      // Agregar día actual a días completados
-      const hoy = new Date();
-      const hoyStr = hoy.toISOString().split('T')[0];
-      if (!datosRacha.dias_completados) {
-        datosRacha.dias_completados = [];
-      }
-      if (!datosRacha.dias_completados.includes(hoyStr)) {
-        datosRacha.dias_completados.push(hoyStr);
-      }
-      
-      // Actualizar interfaz
-      actualizarRacha();
-      generarCalendario();
-      actualizarEstadisticas();
-      actualizarHitos();
-      actualizarLogros();
-      
-      // Efecto de celebración para rachas significativas
-      if (data.nueva_racha % 7 === 0) {
-        mostrarEfectoCelebracion();
-      }
-      
-    } else {
-      mostrarMensaje(data.message, 'warning');
-    }
-    
-    // Restaurar botón
-    setTimeout(() => {
-      btn.disabled = false;
-      btnTexto.textContent = 'Marcar Día de Hoy';
-      verificarEstadoHoy();
-    }, 1000);
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    mostrarMensaje('Error al marcar el día', 'danger');
-    
-    // Restaurar botón
-    btn.disabled = false;
-    btnTexto.textContent = 'Marcar Día de Hoy';
-  });
+
+/* =============================
+   🔥 ACTUALIZAR INFORMACIÓN
+============================= */
+function actualizarVistaRacha() {
+  const dias = datos.diasConsecutivos;
+  document.getElementById("diasConsecutivos").textContent = dias;
+  document.getElementById("rachaActual").textContent = dias;
+  document.getElementById("recordPersonal").textContent = datos.recordPersonal;
+
+  let msg = "";
+  if (dias === 0) msg = "¡Comienza hoy!";
+  else if (dias < 7) msg = "¡Buen inicio!";
+  else if (dias < 30) msg = "🔥 Sigues fuerte!";
+  else msg = "🌟 Eres imparable!";
+
+  document.getElementById("mensajeRacha").textContent = msg;
+
+  document.getElementById("tasaExito").textContent = calcularTasa() + "%";
 }
 
-function verificarEstadoHoy() {
+function calcularTasa() {
+  const fechas = datos.diasCompletados.map(d => new Date(d));
+  if (fechas.length === 0) return 0;
+
+  const primero = Math.min(...fechas);
+  const inicio = new Date(primero);
   const hoy = new Date();
-  const hoyStr = hoy.toISOString().split('T')[0];
-  const btn = document.getElementById('btnMarcarHoy');
-  const btnTexto = document.getElementById('btnTexto');
-  
-  if (datosRacha.dias_completados && datosRacha.dias_completados.includes(hoyStr)) {
-    btn.disabled = true;
-    btn.classList.remove('btn-success');
-    btn.classList.add('btn-secondary');
-    btnTexto.innerHTML = '<i class="bi bi-check2-all me-2"></i>¡Hoy Completado!';
-  } else {
-    btn.disabled = false;
-    btn.classList.remove('btn-secondary');
-    btn.classList.add('btn-success');
-    btnTexto.textContent = 'Marcar Día de Hoy';
-  }
+
+  const diff = Math.floor((hoy - inicio) / (1000*60*60*24)) + 1;
+  return Math.round((fechas.length / diff) * 100);
 }
 
+
+/* =============================
+   🔥 GENERAR CALENDARIO
+============================= */
 function generarCalendario() {
-  const container = document.getElementById('calendarioContainer');
-  if (!container) return;
-  
-  const año = mesActual.getFullYear();
-  const mes = mesActual.getMonth();
-  
-  const primerDiaMes = new Date(año, mes, 1);
-  const ultimoDiaMes = new Date(año, mes + 1, 0);
-  const diasEnMes = ultimoDiaMes.getDate();
-  
-  // Actualizar mes actual en la interfaz
-  const mesActualElement = document.getElementById('mesActual');
-  if (mesActualElement) {
-    mesActualElement.textContent = mesActual.toLocaleDateString('es-ES', { 
-      month: 'long', 
-      year: 'numeric' 
-    });
-  }
-  
-  // Calcular día de la semana del primer día (0 = Domingo, 1 = Lunes, ...)
-  let primerDiaSemana = primerDiaMes.getDay();
-  primerDiaSemana = primerDiaSemana === 0 ? 6 : primerDiaSemana - 1; // Ajustar para que Lunes = 0
-  
-  let calendarioHTML = '';
-  let fechaActual = new Date(primerDiaMes);
-  fechaActual.setDate(fechaActual.getDate() - primerDiaSemana);
-  
-  // Generar 6 semanas (42 días)
-  for (let semana = 0; semana < 6; semana++) {
-    for (let dia = 0; dia < 7; dia++) {
-      const fechaStr = fechaActual.toISOString().split('T')[0];
-      const esHoy = esMismoDia(fechaActual, new Date());
-      const esMesActual = fechaActual.getMonth() === mes;
-      const completado = datosRacha.dias_completados && datosRacha.dias_completados.includes(fechaStr);
-      const esFuturo = fechaActual > new Date();
-      const esPasado = fechaActual < new Date() && !completado && esMesActual && !esHoy;
-      
-      let claseDia = 'calendar-day';
-      if (completado) {
-        claseDia += ' completed';
-      } else if (esHoy) {
-        claseDia += ' current';
-      } else if (esFuturo) {
-        claseDia += ' future';
-      } else if (esPasado) {
-        claseDia += ' missed';
-      } else if (!esMesActual) {
-        claseDia += ' other-month';
-      }
-      
-      const diaNumero = fechaActual.getDate();
-      
-      calendarioHTML += `
-        <div class="${claseDia}" 
-             ${esHoy && !completado ? 'onclick="marcarDiaHoy()" style="cursor: pointer;"' : ''}
-             data-fecha="${fechaStr}"
-             data-bs-toggle="tooltip" 
-             title="${fechaStr}">
-          ${diaNumero}
-          ${completado ? '<div class="day-check"><i class="bi bi-check"></i></div>' : ''}
+  const container = document.getElementById("calendarioContainer");
+  container.innerHTML = "";
+
+  const hoy = new Date();
+  const Y = hoy.getFullYear();
+  const M = hoy.getMonth();
+
+  const inicio = new Date(Y, M, 1);
+  const inicioSemana = inicio.getDay() === 0 ? 6 : inicio.getDay()-1;
+  inicio.setDate(inicio.getDate() - inicioSemana);
+
+  document.getElementById("mesActual").textContent = hoy.toLocaleDateString("es-ES", {month:"long",year:"numeric"});
+
+  let fecha = new Date(inicio);
+
+  for (let s=0; s<6; s++) {
+    let row = '<div class="row text-center mb-2">';
+
+    for (let d=0; d<7; d++) {
+      const fechaISO = fecha.toISOString().slice(0,10);
+      const esHoy = fechaISO === hoy.toISOString().slice(0,10);
+      const completado = datos.diasCompletados.includes(fechaISO);
+      const futuro = fecha > hoy;
+
+      let clase = "calendar-day";
+      if (completado) clase += " bg-success text-white";
+      else if (esHoy) clase += " border border-primary";
+      else if (futuro) clase += " bg-light";
+
+      row += `
+        <div class="col">
+          <div class="${clase}" ${esHoy && !completado ? 'onclick="marcarHoy()"' : ''}>
+            ${fecha.getDate()}
+          </div>
         </div>
       `;
-      
-      fechaActual.setDate(fechaActual.getDate() + 1);
+
+      fecha.setDate(fecha.getDate() + 1);
     }
+
+    row += "</div>";
+    container.innerHTML += row;
   }
-  
-  container.innerHTML = calendarioHTML;
-  
-  // Inicializar tooltips
-  const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-  tooltips.forEach(tooltip => {
-    new bootstrap.Tooltip(tooltip);
-  });
 }
 
-function cambiarMes(direccion) {
-  mesActual.setMonth(mesActual.getMonth() + direccion);
-  generarCalendario();
-  
-  // Deshabilitar botones si es el mes actual o futuro
-  const hoy = new Date();
-  const btnAnterior = document.getElementById('btnMesAnterior');
-  const btnSiguiente = document.getElementById('btnMesSiguiente');
-  
-  btnSiguiente.disabled = mesActual.getMonth() === hoy.getMonth() && 
-                         mesActual.getFullYear() === hoy.getFullYear();
+
+/* =============================
+   🔥 MARCAR EL DÍA
+============================= */
+async function marcarHoy() {
+  try {
+    const r = await fetch("/racha/marcar-dia", { method: "POST" });
+    const data = await r.json();
+
+    if (!data.success) {
+      mostrarMensaje(data.message, "warning");
+      return;
+    }
+
+    mostrarMensaje("¡Día registrado!", "success");
+    cargarRacha();
+
+  } catch (e) {
+    mostrarMensaje("Error al marcar", "danger");
+  }
 }
 
-function esMismoDia(fecha1, fecha2) {
-  return fecha1.getDate() === fecha2.getDate() &&
-         fecha1.getMonth() === fecha2.getMonth() &&
-         fecha1.getFullYear() === fecha2.getFullYear();
-}
 
+/* =============================
+   🔥 Estadísticas
+============================= */
 function actualizarEstadisticas() {
   const hoy = new Date();
-  const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-  const diasEnMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
-  
-  // Calcular días activos este mes
-  let diasActivosMes = 0;
-  if (datosRacha.dias_completados) {
-    diasActivosMes = datosRacha.dias_completados.filter(fecha => {
-      const fechaObj = new Date(fecha);
-      return fechaObj.getMonth() === hoy.getMonth() && 
-             fechaObj.getFullYear() === hoy.getFullYear();
-    }).length;
-  }
-  
-  const diasTranscurridos = hoy.getDate();
-  const consistencia = diasTranscurridos > 0 ? 
-    Math.round((diasActivosMes / diasTranscurridos) * 100) : 0;
-  
-  const porcentajeDiasActivos = Math.round((diasActivosMes / diasEnMes) * 100);
-  
-  // Metas (basadas en días activos)
-  const metasTotales = Math.ceil(diasEnMes * 0.7); // 70% del mes
-  const metasCompletadas = Math.min(diasActivosMes, metasTotales);
-  
-  // Actualizar elementos
-  document.getElementById('consistenciaMensual').textContent = consistencia + '%';
-  document.getElementById('barraConsistencia').style.width = consistencia + '%';
-  
-  document.getElementById('diasActivos').textContent = `${diasActivosMes}/${diasEnMes}`;
-  document.getElementById('barraDiasActivos').style.width = porcentajeDiasActivos + '%';
-  
-  document.getElementById('metasAlcanzadas').textContent = `${metasCompletadas}/${metasTotales}`;
-  document.getElementById('barraMetas').style.width = Math.round((metasCompletadas / metasTotales) * 100) + '%';
+  const Y = hoy.getFullYear();
+  const M = hoy.getMonth();
+  const diasMes = new Date(Y, M+1, 0).getDate();
+
+  const activos = datos.diasCompletados.filter(f => {
+    const d = new Date(f);
+    return d.getFullYear() === Y && d.getMonth() === M;
+  }).length;
+
+  document.getElementById("diasActivos").textContent = activos;
+  document.getElementById("barraDiasActivos").style.width = (activos / diasMes * 100) + "%";
+
+  const consistencia = Math.round((activos / hoy.getDate()) * 100);
+  document.getElementById("consistenciaMensual").textContent = consistencia + "%";
+  document.getElementById("barraConsistencia").style.width = consistencia + "%";
 }
 
+
+/* =============================
+   🔥 Hitos
+============================= */
 function actualizarHitos() {
-  const listaHitos = document.getElementById('listaHitos');
-  if (!listaHitos) return;
-  
-  const hitos = datosRacha.hitos || [3, 7, 14, 30, 60, 90];
-  const diasConsecutivos = datosRacha.dias_consecutivos || 0;
-  
-  listaHitos.innerHTML = '';
-  
-  hitos.forEach(hito => {
-    const diasRestantes = hito - diasConsecutivos;
-    const porcentaje = Math.min(Math.round((diasConsecutivos / hito) * 100), 100);
-    const alcanzado = diasConsecutivos >= hito;
-    const proximo = diasRestantes > 0 && diasRestantes <= 7;
-    
-    let claseHito = 'milestone-item';
-    if (alcanzado) claseHito += ' achieved';
-    if (proximo) claseHito += ' upcoming';
-    
-    const hitoHTML = `
-      <div class="${claseHito}">
-        <div class="milestone-header">
-          <div class="milestone-icon">
-            ${alcanzado ? 
-              '<i class="bi bi-trophy-fill text-warning"></i>' : 
-              '<i class="bi bi-flag"></i>'
-            }
-          </div>
-          <div class="milestone-info">
-            <h6 class="mb-1">${hito} días</h6>
-            <small class="milestone-status">
-              ${alcanzado ? 
-                '<span class="text-success">¡Alcanzado!</span>' : 
-                (proximo ? 
-                  `<span class="text-warning">${diasRestantes} días restantes</span>` :
-                  `<span class="text-muted">${diasRestantes} días restantes</span>`
-                )
-              }
-            </small>
-          </div>
+  const c = document.getElementById("listaHitos");
+  c.innerHTML = "";
+
+  datos.hitos.forEach(h => {
+    const resta = h - datos.diasConsecutivos;
+    const pct = Math.min(100, Math.round((datos.diasConsecutivos / h) * 100));
+
+    c.innerHTML += `
+      <div class="p-2 mb-2 bg-light rounded">
+        <div class="d-flex justify-content-between">
+          <strong>${h} días</strong>
+          <span>${pct}%</span>
         </div>
-        <div class="progress mt-2" style="height: 6px;">
-          <div class="progress-bar ${alcanzado ? 'bg-warning' : 'bg-success'}" 
-               style="width: ${porcentaje}%"></div>
+        <div class="progress mt-1" style="height:5px;">
+          <div class="progress-bar bg-success" style="width:${pct}%"></div>
         </div>
+        <small class="text-muted">${resta > 0 ? resta + " días restantes" : "¡Hito alcanzado!"}</small>
       </div>
     `;
-    
-    listaHitos.innerHTML += hitoHTML;
   });
 }
 
-function actualizarLogros() {
-  const listaLogros = document.getElementById('listaLogros');
-  if (!listaLogros) return;
-  
-  const diasConsecutivos = datosRacha.dias_consecutivos || 0;
-  const logros = [
-    { id: 1, nombre: 'Primeros Pasos', descripcion: 'Completa 3 días consecutivos', objetivo: 3, icono: 'bi-emoji-smile' },
-    { id: 2, nombre: 'Semana de Fuego', descripcion: '7 días consecutivos', objetivo: 7, icono: 'bi-fire' },
-    { id: 3, nombre: 'Fuerza de Voluntad', descripcion: '14 días consecutivos', objetivo: 14, icono: 'bi-heart' },
-    { id: 4, nombre: 'Mes de Éxito', descripcion: '30 días consecutivos', objetivo: 30, icono: 'bi-trophy' },
-    { id: 5, nombre: 'Leyenda Fitness', descripcion: '90 días consecutivos', objetivo: 90, icono: 'bi-award' }
-  ];
-  
-  listaLogros.innerHTML = '';
-  
-  logros.forEach(logro => {
-    const desbloqueado = diasConsecutivos >= logro.objetivo;
-    const progreso = Math.min(diasConsecutivos, logro.objetivo);
-    const porcentaje = Math.round((progreso / logro.objetivo) * 100);
-    
-    const logroHTML = `
-      <div class="achievement-item ${desbloqueado ? 'unlocked' : 'locked'}">
-        <div class="achievement-icon">
-          <i class="bi ${logro.icono} ${desbloqueado ? 'text-warning' : 'text-muted'}"></i>
-        </div>
-        <div class="achievement-info">
-          <h6 class="mb-1">${logro.nombre}</h6>
-          <small class="text-muted">${logro.descripcion}</small>
-          ${!desbloqueado ? `
-            <div class="progress mt-1" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: ${porcentaje}%"></div>
-            </div>
-          ` : ''}
-        </div>
-        ${desbloqueado ? '<div class="achievement-badge"><i class="bi bi-check-lg text-success"></i></div>' : ''}
-      </div>
-    `;
-    
-    listaLogros.innerHTML += logroHTML;
-  });
+
+/* =============================
+   🔔 RECORDATORIO
+============================= */
+function abrirModalRecordatorio() {
+  document.getElementById("recordatorioHora").value = datos.recordatorio.hora;
+  document.getElementById("recordatorioActivo").checked = datos.recordatorio.activo;
+
+  new bootstrap.Modal(document.getElementById("modalRecordatorio")).show();
 }
 
-function calcularTasaExito() {
-  if (!datosRacha.dias_completados || datosRacha.dias_completados.length === 0) return 0;
-  
-  const primerDia = new Date(Math.min(...datosRacha.dias_completados.map(d => new Date(d))));
-  const hoy = new Date();
-  const diasTotales = Math.ceil((hoy - primerDia) / (1000 * 60 * 60 * 24)) + 1;
-  
-  return Math.round((datosRacha.dias_completados.length / diasTotales) * 100);
-}
+async function guardarRecordatorio() {
+  const hora = document.getElementById("recordatorioHora").value;
+  const activo = document.getElementById("recordatorioActivo").checked;
 
-function compartirRacha() {
-  const diasConsecutivos = datosRacha.dias_consecutivos || 0;
-  const recordPersonal = datosRacha.record_personal || 0;
-  const totalDias = datosRacha.dias_completados ? datosRacha.dias_completados.length : 0;
-  
-  const texto = `🔥 ¡Llevo ${diasConsecutivos} días consecutivos entrenando con Healthy Life! 
-💪 Mi récord personal: ${recordPersonal} días
-📊 Total de días activos: ${totalDias}
-✨ ¡Únete a mi desafío fitness! 
-
-#HealthyLife #FitnessChallenge #RachaFitness`;
-
-  if (navigator.share) {
-    navigator.share({
-      title: 'Mi Racha de Entrenamiento - Healthy Life',
-      text: texto,
-      url: window.location.href
+  try {
+    const r = await fetch("/racha/actualizar-recordatorio", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        hora,
+        activo,
+        frecuencia:"diario"
+      })
     });
-  } else {
-    navigator.clipboard.writeText(texto).then(() => {
-      mostrarMensaje('¡Texto copiado al portapapeles! Comparte tu logro en redes sociales.', 'success');
-    });
+
+    const data = await r.json();
+    mostrarMensaje(data.message || "Guardado", "success");
+
+    bootstrap.Modal.getInstance(document.getElementById("modalRecordatorio")).hide();
+
+    cargarRacha();
+
+  } catch(e) {
+    mostrarMensaje("Error guardando recordatorio", "danger");
   }
 }
 
-function configurarRecordatorio() {
-  const modalElement = document.getElementById('modalRecordatorio');
-  if (!modalElement) return;
-  
-  const horaInput = document.getElementById('horaRecordatorio');
-  const activoInput = document.getElementById('recordatorioActivo');
-  const frecuenciaInput = document.getElementById('frecuenciaRecordatorio');
-  
-  if (horaInput) horaInput.value = datosRacha.recordatorio ? datosRacha.recordatorio.hora : '19:00';
-  if (activoInput) activoInput.checked = datosRacha.recordatorio ? datosRacha.recordatorio.activo : true;
-  if (frecuenciaInput && datosRacha.recordatorio && datosRacha.recordatorio.frecuencia) {
-    frecuenciaInput.value = datosRacha.recordatorio.frecuencia;
-  }
-  
-  const modal = new bootstrap.Modal(modalElement);
-  modal.show();
+
+/* =============================
+   📢 ALERTAS
+============================= */
+function mostrarMensaje(msg, tipo) {
+  const a = document.createElement("div");
+  a.className = `alert alert-${tipo} position-fixed top-0 end-0 mt-3 me-3`;
+  a.textContent = msg;
+  document.body.appendChild(a);
+
+  setTimeout(() => a.remove(), 3000);
 }
 
-function guardarRecordatorio() {
-  const horaInput = document.getElementById('horaRecordatorio');
-  const activoInput = document.getElementById('recordatorioActivo');
-  const frecuenciaInput = document.getElementById('frecuenciaRecordatorio');
-  
-  const recordatorio = {
-    activo: activoInput ? activoInput.checked : true,
-    hora: horaInput ? horaInput.value : '19:00',
-    frecuencia: frecuenciaInput ? frecuenciaInput.value : 'diario'
-  };
-
-  fetch('/racha/actualizar-recordatorio', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(recordatorio)
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      mostrarMensaje(data.message, 'success');
-      // Actualizar datos locales
-      if (!datosRacha.recordatorio) {
-        datosRacha.recordatorio = {};
-      }
-      datosRacha.recordatorio.activo = recordatorio.activo;
-      datosRacha.recordatorio.hora = recordatorio.hora;
-      datosRacha.recordatorio.frecuencia = recordatorio.frecuencia;
-    } else {
-      mostrarMensaje(data.message, 'danger');
-    }
-    
-    const modalElement = document.getElementById('modalRecordatorio');
-    if (modalElement) {
-      const modal = bootstrap.Modal.getInstance(modalElement);
-      if (modal) modal.hide();
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    mostrarMensaje('Error al actualizar el recordatorio', 'danger');
-  });
-}
-
-function verEstadisticasCompletas() {
-  // Actualizar datos en el modal
-  document.getElementById('modalRachaActual').textContent = datosRacha.dias_consecutivos || 0;
-  document.getElementById('modalRecordPersonal').textContent = datosRacha.record_personal || 0;
-  document.getElementById('modalTotalDias').textContent = datosRacha.dias_completados ? datosRacha.dias_completados.length : 0;
-  document.getElementById('modalTasaExito').textContent = calcularTasaExito() + '%';
-  
-  const modal = new bootstrap.Modal(document.getElementById('modalEstadisticas'));
-  modal.show();
-}
-
-function mostrarTipAleatorio() {
-  const tipElement = document.getElementById('tipDelDia');
-  if (tipElement && tipsMotivacionales.length > 0) {
-    const tipAleatorio = tipsMotivacionales[Math.floor(Math.random() * tipsMotivacionales.length)];
-    tipElement.textContent = tipAleatorio;
-  }
-}
-
-function mostrarEfectoCelebracion() {
-  // Crear elementos de confeti
-  const colores = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
-  
-  for (let i = 0; i < 50; i++) {
-    setTimeout(() => {
-      const confeti = document.createElement('div');
-      confeti.className = 'confeti';
-      confeti.style.cssText = `
-        position: fixed;
-        width: 10px;
-        height: 10px;
-        background: ${colores[Math.floor(Math.random() * colores.length)]};
-        top: -10px;
-        left: ${Math.random() * 100}%;
-        animation: fall-confeti ${2 + Math.random() * 3}s linear forwards;
-        z-index: 9999;
-        border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
-      `;
-      
-      document.body.appendChild(confeti);
-      
-      // Remover después de la animación
-      setTimeout(() => {
-        if (confeti.parentNode) {
-          confeti.remove();
-        }
-      }, 5000);
-    }, i * 100);
-  }
-}
-
-function mostrarMensaje(mensaje, tipo) {
-  // Remover mensajes existentes
-  const mensajesExistentes = document.querySelectorAll('.alert-position');
-  mensajesExistentes.forEach(msg => msg.remove());
-  
-  const alerta = document.createElement('div');
-  alerta.className = `alert alert-${tipo} alert-dismissible fade show alert-position`;
-  alerta.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-  alerta.innerHTML = `
-    <div class="d-flex align-items-center">
-      <i class="bi ${tipo === 'success' ? 'bi-check-circle' : tipo === 'warning' ? 'bi-exclamation-triangle' : 'bi-x-circle'} me-2"></i>
-      <span>${mensaje}</span>
-    </div>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  `;
-  
-  document.body.appendChild(alerta);
-  
-  // Auto-remover después de 5 segundos
-  setTimeout(() => {
-    if (alerta.parentNode) {
-      alerta.remove();
-    }
-  }, 5000);
-}
-
-// Estilos CSS dinámicos
-const estiloDinamico = document.createElement('style');
-estiloDinamico.textContent = `
-  /* Animación de confeti */
-  @keyframes fall-confeti {
-    0% {
-      transform: translateY(0) rotate(0deg);
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(100vh) rotate(360deg);
-      opacity: 0;
-    }
-  }
-  
-  /* Animación de pulso para la racha */
-  @keyframes pulse-glow {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-  }
-  
-  .pulse-animation {
-    animation: pulse-glow 2s infinite;
-  }
-  
-  .super-pulse {
-    animation: pulse-glow 1s infinite;
-  }
-  
-  /* Partículas de fuego */
-  .flame-particles {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-  
-  .particle {
-    position: absolute;
-    background: #ff6b00;
-    border-radius: 50%;
-    animation: float-particle 3s infinite ease-in-out;
-  }
-  
-  .particle-1 {
-    width: 8px;
-    height: 8px;
-    top: 20%;
-    left: 30%;
-    animation-delay: 0s;
-  }
-  
-  .particle-2 {
-    width: 6px;
-    height: 6px;
-    top: 10%;
-    left: 60%;
-    animation-delay: 1s;
-  }
-  
-  .particle-3 {
-    width: 4px;
-    height: 4px;
-    top: 30%;
-    left: 80%;
-    animation-delay: 2s;
-  }
-  
-  @keyframes float-particle {
-    0%, 100% {
-      transform: translateY(0) scale(1);
-      opacity: 0.7;
-    }
-    50% {
-      transform: translateY(-20px) scale(1.2);
-      opacity: 1;
-    }
-  }
-`;
-document.head.appendChild(estiloDinamico);
 </script>
 
 <style>
-/* Estilos principales para la página de racha */
-.streak-hero-card {
-  background: linear-gradient(135deg, #ff6b00, #ff8c00, #ffa500);
-  border-radius: 20px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(255, 107, 0, 0.3);
-}
-
-.streak-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-}
-
-.streak-flame-container {
-  position: relative;
-  display: inline-block;
-}
-
-.streak-flame-main {
-  font-size: 5rem;
-  color: #fff;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-               0 0 40px rgba(255, 255, 255, 0.3),
-               0 0 60px rgba(255, 255, 255, 0.1);
-  animation: flame-flicker 2s infinite alternate;
-}
-
-@keyframes flame-flicker {
-  0%, 100% {
-    transform: scale(1) rotate(0deg);
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
-                 0 0 40px rgba(255, 255, 255, 0.3);
-  }
-  50% {
-    transform: scale(1.1) rotate(5deg);
-    text-shadow: 0 0 30px rgba(255, 255, 255, 0.7),
-                 0 0 50px rgba(255, 255, 255, 0.5),
-                 0 0 70px rgba(255, 255, 255, 0.3);
-  }
-}
-
-.flame-burn .streak-flame-main {
-  animation: flame-flicker 1s infinite alternate;
-}
-
-.flame-super-burn .streak-flame-main {
-  animation: flame-flicker 0.5s infinite alternate;
-}
-
-.stat-card {
-  text-align: center;
-  padding: 1rem;
-}
-
-.stat-icon {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.stat-number {
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-
-.glow-button {
-  box-shadow: 0 0 20px rgba(25, 135, 84, 0.5);
-  transition: all 0.3s ease;
-}
-
-.glow-button:hover {
-  box-shadow: 0 0 30px rgba(25, 135, 84, 0.7);
-  transform: translateY(-2px);
-}
-
-/* Secciones */
-.streak-section-card {
-  background: white;
-  border-radius: 15px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.section-header {
-  border-bottom: 2px solid #f8f9fa;
-  padding-bottom: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-/* Calendario */
-.calendar-weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 5px;
-  text-align: center;
-}
-
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-}
-
+/* ESTILOS CALENDARIO */
 .calendar-day {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  font-weight: 600;
+  width: 38px;
+  height: 38px;
+  margin: auto;
+  border-radius: 8px;
+  line-height: 38px;
   font-size: 0.9rem;
-  position: relative;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
+  cursor: default;
 }
-
-.calendar-day.completed {
-  background: linear-gradient(135deg, #28a745, #20c997);
-  color: white;
-  transform: scale(1.05);
+.calendar-day:hover {
+  opacity: .8;
+  cursor: pointer;
 }
-
-.calendar-day.current {
-  background: #198754;
-  color: white;
-  border-color: #198754;
-  box-shadow: 0 0 10px rgba(25, 135, 84, 0.5);
-}
-
-.calendar-day.future {
-  background: #f8f9fa;
-  color: #6c757d;
-  border-color: #e9ecef;
-}
-
-.calendar-day.missed {
-  background: #f8f9fa;
-  color: #dc3545;
-  border: 2px dashed #dc3545;
-}
-
-.calendar-day.other-month {
-  background: #f8f9fa;
-  color: #adb5bd;
-  opacity: 0.5;
-}
-
-.calendar-day:hover:not(.completed):not(.current) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.day-check {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  font-size: 0.7rem;
-}
-
-.calendar-legend {
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.legend-color {
+.calendar-square {
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  border: 2px solid transparent;
 }
-
-.legend-color.completed {
-  background: linear-gradient(135deg, #28a745, #20c997);
+/* Tarjetas */
+.streak-card {
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.05);
 }
-
-.legend-color.current {
-  background: #198754;
-  border-color: #198754;
-}
-
-.legend-color.future {
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
-}
-
-.legend-color.missed {
-  background: #f8f9fa;
-  border: 2px dashed #dc3545;
-}
-
-/* Barras de progreso */
-.progress-bars-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.progress-item {
-  margin-bottom: 0.5rem;
-}
-
-.progress {
-  height: 10px;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-/* Hitos y logros */
-.milestones-container,
-.achievements-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.milestone-item {
-  padding: 1rem;
-  border-radius: 10px;
-  border: 2px solid #e9ecef;
-  transition: all 0.3s ease;
-}
-
-.milestone-item.achieved {
-  border-color: #ffc107;
-  background: rgba(255, 193, 7, 0.05);
-}
-
-.milestone-item.upcoming {
-  border-color: #198754;
-  background: rgba(25, 135, 84, 0.05);
-}
-
-.milestone-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.milestone-icon {
-  font-size: 1.5rem;
-  color: #6c757d;
-}
-
-.milestone-item.achieved .milestone-icon {
-  color: #ffc107;
-}
-
-.achievement-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 10px;
-  border: 2px solid #e9ecef;
-  transition: all 0.3s ease;
-}
-
-.achievement-item.unlocked {
-  border-color: #ffc107;
-  background: rgba(255, 193, 7, 0.05);
-}
-
-.achievement-icon {
-  font-size: 1.8rem;
-}
-
-.achievement-info {
-  flex: 1;
-}
-
-.achievement-badge {
-  color: #28a745;
-  font-size: 1.2rem;
-}
-
-/* Acciones */
-.actions-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-/* Tips */
-.tip-content {
-  padding: 1rem;
-  background: rgba(13, 202, 240, 0.05);
-  border-radius: 10px;
-  border-left: 4px solid #0dcaf0;
-}
-
-/* Modal de estadísticas */
-.stat-card-modal {
-  text-align: center;
-  padding: 1.5rem;
-  border: 2px solid #f8f9fa;
-  border-radius: 10px;
-  background: #f8f9fa;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .streak-flame-main {
-    font-size: 3rem;
-  }
-  
-  .display-2 {
-    font-size: 3rem;
-  }
-  
-  .stat-number {
-    font-size: 1.5rem;
-  }
-  
-  .calendar-day {
-    font-size: 0.8rem;
-  }
-  
-  .streak-section-card {
-    padding: 1rem;
-  }
-}
-
-/* Animaciones para botones */
-.btn {
-  transition: all 0.3s ease;
-}
-
-.btn:active {
-  transform: scale(0.98);
-}
-
-/* Mejoras de accesibilidad */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+.streak-flame i {
+  font-size: 3rem;
+  color: #fd7e14;
 }
 </style>
+
 {% endblock %}
