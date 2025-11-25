@@ -9,20 +9,30 @@
         <div class="streak-flame mb-3">
           <i class="bi bi-fire"></i>
         </div>
-        <h1 class="display-4 fw-bold text-warning mb-2" id="diasConsecutivos">0</h1>
+        <h1 class="display-4 fw-bold text-warning mb-2" id="diasConsecutivos">{{ racha.dias_consecutivos if racha else 0 }}</h1>
         <h3 class="text-dark mb-3">Días Consecutivos</h3>
-        <p class="text-muted mb-4" id="mensajeRacha">¡Comienza tu racha hoy mismo!</p>
+        <p class="text-muted mb-4" id="mensajeRacha">
+          {% if racha and racha.dias_consecutivos == 0 %}
+            ¡Comienza tu racha hoy mismo!
+          {% elif racha and racha.dias_consecutivos < 7 %}
+            ¡Sigue así! Estás construyendo un hábito increíble.
+          {% elif racha and racha.dias_consecutivos < 30 %}
+            ¡Excelente trabajo! Tu consistencia es admirable.
+          {% else %}
+            ¡Eres una máquina! Sigue rompiendo tus límites.
+          {% endif %}
+        </p>
         
         <div class="row text-center">
           <div class="col-md-4">
             <div class="border-end">
-              <h4 class="text-success mb-1" id="rachaActual">0</h4>
+              <h4 class="text-success mb-1" id="rachaActual">{{ racha.dias_consecutivos if racha else 0 }}</h4>
               <small class="text-muted">Racha Actual</small>
             </div>
           </div>
           <div class="col-md-4">
             <div class="border-end">
-              <h4 class="text-primary mb-1" id="recordPersonal">0</h4>
+              <h4 class="text-primary mb-1" id="recordPersonal">{{ racha.record_personal if racha else 0 }}</h4>
               <small class="text-muted">Récord Personal</small>
             </div>
           </div>
@@ -43,15 +53,7 @@
           <h4 class="mb-0">
             <i class="bi bi-calendar3 text-primary me-2"></i>Calendario de Progreso
           </h4>
-          <div>
-            <button class="btn btn-sm btn-outline-secondary me-2" id="btnMesAnterior">
-              <i class="bi bi-chevron-left"></i>
-            </button>
-            <span class="badge bg-success" id="mesActual">Octubre 2025</span>
-            <button class="btn btn-sm btn-outline-secondary ms-2" id="btnMesSiguiente">
-              <i class="bi bi-chevron-right"></i>
-            </button>
-          </div>
+          <span class="badge bg-success" id="mesActual">Cargando...</span>
         </div>
 
         <!-- Días de la semana -->
@@ -85,8 +87,8 @@
           </div>
           <div class="col-md-4">
             <div class="d-flex align-items-center justify-content-center">
-              <div class="calendar-day missed me-2"></div>
-              <small>Perdido</small>
+              <div class="calendar-day future me-2"></div>
+              <small>Próximo</small>
             </div>
           </div>
         </div>
@@ -145,17 +147,14 @@
           <i class="bi bi-lightning text-warning me-2"></i>Acciones
         </h5>
         <div class="d-grid gap-2">
-          <button class="btn btn-success" id="btnMarcarHoy">
+          <button class="btn btn-success" onclick="marcarDiaHoy()">
             <i class="bi bi-check-circle me-2"></i>Marcar Hoy
           </button>
-          <button class="btn btn-outline-primary" id="btnCompartirRacha">
+          <button class="btn btn-outline-primary" onclick="compartirRacha()">
             <i class="bi bi-share me-2"></i>Compartir Racha
           </button>
-          <button class="btn btn-outline-info" id="btnConfigurarRecordatorio">
+          <button class="btn btn-outline-info" onclick="configurarRecordatorio()">
             <i class="bi bi-bell me-2"></i>Recordatorios
-          </button>
-          <button class="btn btn-outline-danger" id="btnReiniciarRacha">
-            <i class="bi bi-arrow-clockwise me-2"></i>Reiniciar Racha
           </button>
         </div>
       </div>
@@ -174,10 +173,10 @@
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">Hora del recordatorio</label>
-          <input type="time" class="form-control" id="horaRecordatorio" value="19:00">
+          <input type="time" class="form-control" id="horaRecordatorio" value="{{ racha.recordatorio.hora if racha and racha.recordatorio else '19:00' }}">
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="recordatorioActivo" checked>
+          <input class="form-check-input" type="checkbox" id="recordatorioActivo" {% if racha and racha.recordatorio and racha.recordatorio.activo %}checked{% endif %}>
           <label class="form-check-label" for="recordatorioActivo">
             Recordatorio activo
           </label>
@@ -185,26 +184,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-success" id="btnGuardarRecordatorio">Guardar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal de Confirmación de Reinicio -->
-<div class="modal fade" id="modalReiniciar" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Reiniciar Racha</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>¿Estás seguro de que quieres reiniciar tu racha? Esta acción eliminará todos tus datos de progreso y no se puede deshacer.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" id="btnConfirmarReinicio">Sí, Reiniciar</button>
+        <button type="button" class="btn btn-success" onclick="guardarRecordatorio()">Guardar</button>
       </div>
     </div>
   </div>
@@ -214,99 +194,54 @@
 
 {% block scripts %}
 <script>
-// Datos de la racha
-let datosRacha = {
-  diasConsecutivos: 0,
-  recordPersonal: 0,
-  diasCompletados: [],
-  fechaUltimoDia: null,
-  hitos: [7, 14, 30, 60, 90],
-  recordatorio: {
-    activo: true,
-    hora: '19:00'
-  }
-};
-
-// Variables para navegación del calendario
-let mesCalendario = new Date().getMonth();
-let añoCalendario = new Date().getFullYear();
-
-// Cargar datos guardados
-function cargarDatosRacha() {
-  const datosGuardados = localStorage.getItem('racha_healthy_life');
-  if (datosGuardados) {
-    try {
-      datosRacha = { ...datosRacha, ...JSON.parse(datosGuardados) };
-    } catch (e) {
-      console.error('Error al cargar datos de racha:', e);
-    }
-  }
-}
-
-// Guardar datos
-function guardarDatosRacha() {
-  try {
-    localStorage.setItem('racha_healthy_life', JSON.stringify(datosRacha));
-  } catch (e) {
-    console.error('Error al guardar datos de racha:', e);
-  }
-}
+let datosRacha = {{ racha|tojson if racha else '{}' }};
 
 // Cargar datos al iniciar
 document.addEventListener('DOMContentLoaded', function() {
-  cargarDatosRacha();
-  inicializarEventListeners();
-  actualizarRacha();
-  generarCalendario();
-  actualizarEstadisticas();
-  actualizarHitos();
+  if (Object.keys(datosRacha).length === 0) {
+    cargarDatosRacha();
+  } else {
+    actualizarRacha();
+    generarCalendario();
+    actualizarEstadisticas();
+    actualizarHitos();
+  }
 });
 
-function inicializarEventListeners() {
-  // Botones de navegación del calendario
-  document.getElementById('btnMesAnterior').addEventListener('click', mesAnterior);
-  document.getElementById('btnMesSiguiente').addEventListener('click', mesSiguiente);
-  
-  // Botones de acciones
-  document.getElementById('btnMarcarHoy').addEventListener('click', marcarDiaHoy);
-  document.getElementById('btnCompartirRacha').addEventListener('click', compartirRacha);
-  document.getElementById('btnConfigurarRecordatorio').addEventListener('click', configurarRecordatorio);
-  document.getElementById('btnReiniciarRacha').addEventListener('click', mostrarModalReinicio);
-  document.getElementById('btnConfirmarReinicio').addEventListener('click', reiniciarRacha);
-  document.getElementById('btnGuardarRecordatorio').addEventListener('click', guardarRecordatorio);
+function cargarDatosRacha() {
+  fetch('/racha/datos')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        datosRacha = data.racha;
+        actualizarRacha();
+        generarCalendario();
+        actualizarEstadisticas();
+        actualizarHitos();
+      } else {
+        console.error('Error al cargar datos de racha:', data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error al cargar datos de racha:', error);
+    });
 }
 
 function actualizarRacha() {
-  const hoy = new Date();
-  const hoyStr = hoy.toDateString();
-  
-  // Verificar si ya se marcó hoy
-  const yaMarcadoHoy = datosRacha.diasCompletados.includes(hoyStr);
-  
-  // Actualizar racha si no se ha marcado hoy y el último día fue ayer
-  if (!yaMarcadoHoy && datosRacha.fechaUltimoDia) {
-    const ultimoDia = new Date(datosRacha.fechaUltimoDia);
-    const ayer = new Date(hoy);
-    ayer.setDate(ayer.getDate() - 1);
-    
-    // Si el último día no fue ayer, reiniciar racha
-    if (ultimoDia.toDateString() !== ayer.toDateString()) {
-      datosRacha.diasConsecutivos = 0;
-    }
-  }
-  
-  // Actualizar interfaz
-  document.getElementById('diasConsecutivos').textContent = datosRacha.diasConsecutivos;
-  document.getElementById('rachaActual').textContent = datosRacha.diasConsecutivos;
-  document.getElementById('recordPersonal').textContent = datosRacha.recordPersonal;
+  // Actualizar interfaz con datos de la racha
+  document.getElementById('diasConsecutivos').textContent = datosRacha.dias_consecutivos || 0;
+  document.getElementById('rachaActual').textContent = datosRacha.dias_consecutivos || 0;
+  document.getElementById('recordPersonal').textContent = datosRacha.record_personal || 0;
   
   // Actualizar mensaje motivacional
   const mensajeRacha = document.getElementById('mensajeRacha');
-  if (datosRacha.diasConsecutivos === 0) {
+  const diasConsecutivos = datosRacha.dias_consecutivos || 0;
+  
+  if (diasConsecutivos === 0) {
     mensajeRacha.textContent = '¡Comienza tu racha hoy mismo!';
-  } else if (datosRacha.diasConsecutivos < 7) {
+  } else if (diasConsecutivos < 7) {
     mensajeRacha.textContent = '¡Sigue así! Estás construyendo un hábito increíble.';
-  } else if (datosRacha.diasConsecutivos < 30) {
+  } else if (diasConsecutivos < 30) {
     mensajeRacha.textContent = '¡Excelente trabajo! Tu consistencia es admirable.';
   } else {
     mensajeRacha.textContent = '¡Eres una máquina! Sigue rompiendo tus límites.';
@@ -318,36 +253,42 @@ function actualizarRacha() {
 }
 
 function marcarDiaHoy() {
-  const hoy = new Date();
-  const hoyStr = hoy.toDateString();
-  
-  if (datosRacha.diasCompletados.includes(hoyStr)) {
-    mostrarMensaje('¡Ya has marcado tu entrenamiento para hoy!', 'info');
-    return;
-  }
-  
-  // Agregar día actual
-  datosRacha.diasCompletados.push(hoyStr);
-  datosRacha.fechaUltimoDia = hoy.toISOString();
-  
-  // Actualizar racha consecutiva
-  datosRacha.diasConsecutivos++;
-  
-  // Actualizar récord personal
-  if (datosRacha.diasConsecutivos > datosRacha.recordPersonal) {
-    datosRacha.recordPersonal = datosRacha.diasConsecutivos;
-  }
-  
-  // Guardar en localStorage
-  guardarDatosRacha();
-  
-  // Actualizar interfaz
-  actualizarRacha();
-  generarCalendario();
-  actualizarEstadisticas();
-  actualizarHitos();
-  
-  mostrarMensaje('¡Día marcado correctamente! Sigue con la racha.', 'success');
+  fetch('/racha/marcar-dia', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      mostrarMensaje(data.message, 'success');
+      // Actualizar datos locales
+      datosRacha.dias_consecutivos = data.nueva_racha;
+      datosRacha.record_personal = data.record_personal;
+      
+      // Agregar día actual a días completados
+      const hoy = new Date();
+      const hoyStr = hoy.toISOString().split('T')[0];
+      if (!datosRacha.dias_completados) {
+        datosRacha.dias_completados = [];
+      }
+      if (!datosRacha.dias_completados.includes(hoyStr)) {
+        datosRacha.dias_completados.push(hoyStr);
+      }
+      
+      actualizarRacha();
+      generarCalendario();
+      actualizarEstadisticas();
+      actualizarHitos();
+    } else {
+      mostrarMensaje(data.message, 'warning');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    mostrarMensaje('Error al marcar el día', 'danger');
+  });
 }
 
 function generarCalendario() {
@@ -355,8 +296,17 @@ function generarCalendario() {
   if (!container) return;
   
   const hoy = new Date();
-  const primerDiaMes = new Date(añoCalendario, mesCalendario, 1);
-  const ultimoDiaMes = new Date(añoCalendario, mesCalendario + 1, 0);
+  const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  const ultimoDiaMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+  
+  // Actualizar mes actual
+  const mesActualElement = document.getElementById('mesActual');
+  if (mesActualElement) {
+    mesActualElement.textContent = hoy.toLocaleDateString('es-ES', { 
+      month: 'long', 
+      year: 'numeric' 
+    });
+  }
   
   let calendarioHTML = '';
   let fechaActual = new Date(primerDiaMes);
@@ -371,20 +321,17 @@ function generarCalendario() {
     calendarioHTML += '<div class="row text-center mt-2">';
     
     for (let dia = 0; dia < 7; dia++) {
-      const fechaStr = fechaActual.toDateString();
+      const fechaStr = fechaActual.toISOString().split('T')[0];
       const esHoy = fechaActual.toDateString() === hoy.toDateString();
-      const esMesActual = fechaActual.getMonth() === mesCalendario;
-      const completado = datosRacha.diasCompletados.includes(fechaStr);
+      const esMesActual = fechaActual.getMonth() === hoy.getMonth();
+      const completado = datosRacha.dias_completados && datosRacha.dias_completados.includes(fechaStr);
       const esFuturo = fechaActual > hoy;
-      const esPasado = fechaActual < hoy && !completado && !esFuturo;
       
       let claseDia = 'calendar-day';
       if (completado) {
         claseDia += ' completed';
       } else if (esHoy) {
         claseDia += ' current';
-      } else if (esPasado) {
-        claseDia += ' missed';
       } else if (esFuturo) {
         claseDia += ' future';
       } else if (!esMesActual) {
@@ -413,33 +360,6 @@ function generarCalendario() {
   }
   
   container.innerHTML = calendarioHTML;
-  
-  // Actualizar mes actual
-  const mesActualElement = document.getElementById('mesActual');
-  if (mesActualElement) {
-    mesActualElement.textContent = new Date(añoCalendario, mesCalendario).toLocaleDateString('es-ES', { 
-      month: 'long', 
-      year: 'numeric' 
-    });
-  }
-}
-
-function mesAnterior() {
-  mesCalendario--;
-  if (mesCalendario < 0) {
-    mesCalendario = 11;
-    añoCalendario--;
-  }
-  generarCalendario();
-}
-
-function mesSiguiente() {
-  mesCalendario++;
-  if (mesCalendario > 11) {
-    mesCalendario = 0;
-    añoCalendario++;
-  }
-  generarCalendario();
 }
 
 function actualizarEstadisticas() {
@@ -448,11 +368,14 @@ function actualizarEstadisticas() {
   const diasEnMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
   
   // Calcular días activos este mes
-  const diasActivosMes = datosRacha.diasCompletados.filter(fecha => {
-    const fechaObj = new Date(fecha);
-    return fechaObj.getMonth() === hoy.getMonth() && 
-           fechaObj.getFullYear() === hoy.getFullYear();
-  }).length;
+  let diasActivosMes = 0;
+  if (datosRacha.dias_completados) {
+    diasActivosMes = datosRacha.dias_completados.filter(fecha => {
+      const fechaObj = new Date(fecha);
+      return fechaObj.getMonth() === hoy.getMonth() && 
+             fechaObj.getFullYear() === hoy.getFullYear();
+    }).length;
+  }
   
   const diasTranscurridos = hoy.getDate();
   const consistencia = diasTranscurridos > 0 ? 
@@ -464,22 +387,15 @@ function actualizarEstadisticas() {
   const metasTotales = 15;
   const metasCompletadas = Math.min(Math.round(diasActivosMes * 0.8), metasTotales);
   
-  // Actualizar elementos si existen
-  const consistenciaElement = document.getElementById('consistenciaMensual');
-  const barraConsistencia = document.getElementById('barraConsistencia');
-  const diasActivosElement = document.getElementById('diasActivos');
-  const barraDiasActivos = document.getElementById('barraDiasActivos');
-  const metasAlcanzadasElement = document.getElementById('metasAlcanzadas');
-  const barraMetas = document.getElementById('barraMetas');
+  // Actualizar elementos
+  document.getElementById('consistenciaMensual').textContent = consistencia + '%';
+  document.getElementById('barraConsistencia').style.width = consistencia + '%';
   
-  if (consistenciaElement) consistenciaElement.textContent = consistencia + '%';
-  if (barraConsistencia) barraConsistencia.style.width = consistencia + '%';
+  document.getElementById('diasActivos').textContent = `${diasActivosMes}/${diasEnMes}`;
+  document.getElementById('barraDiasActivos').style.width = porcentajeDiasActivos + '%';
   
-  if (diasActivosElement) diasActivosElement.textContent = `${diasActivosMes}/${diasEnMes}`;
-  if (barraDiasActivos) barraDiasActivos.style.width = porcentajeDiasActivos + '%';
-  
-  if (metasAlcanzadasElement) metasAlcanzadasElement.textContent = `${metasCompletadas}/${metasTotales}`;
-  if (barraMetas) barraMetas.style.width = Math.round((metasCompletadas / metasTotales) * 100) + '%';
+  document.getElementById('metasAlcanzadas').textContent = `${metasCompletadas}/${metasTotales}`;
+  document.getElementById('barraMetas').style.width = Math.round((metasCompletadas / metasTotales) * 100) + '%';
 }
 
 function actualizarHitos() {
@@ -488,20 +404,22 @@ function actualizarHitos() {
   
   listaHitos.innerHTML = '';
   
-  datosRacha.hitos.forEach(hito => {
-    const diasRestantes = hito - datosRacha.diasConsecutivos;
-    const porcentaje = Math.min(Math.round((datosRacha.diasConsecutivos / hito) * 100), 100);
-    const alcanzado = datosRacha.diasConsecutivos >= hito;
+  const hitos = datosRacha.hitos || [7, 14, 30, 60, 90];
+  const diasConsecutivos = datosRacha.dias_consecutivos || 0;
+  
+  hitos.forEach(hito => {
+    const diasRestantes = hito - diasConsecutivos;
+    const porcentaje = Math.min(Math.round((diasConsecutivos / hito) * 100), 100);
     
     const hitoHTML = `
       <div class="milestone-badge mb-3">
         <div class="d-flex justify-content-between align-items-center mb-1">
-          <h6 class="${alcanzado ? 'text-success' : 'text-dark'} mb-0">${hito} días</h6>
-          <span class="badge ${alcanzado ? 'bg-success' : 'bg-secondary'}">${alcanzado ? '¡Logrado!' : porcentaje + '%'}</span>
+          <h6 class="text-success mb-0">${hito} días</h6>
+          <span class="badge bg-success">${porcentaje}%</span>
         </div>
-        <small class="text-muted">${alcanzado ? '¡Felicidades!' : (diasRestantes > 0 ? diasRestantes + ' días restantes' : '¡Casi lo logras!')}</small>
+        <small class="text-muted">${diasRestantes > 0 ? diasRestantes + ' días restantes' : '¡Hito alcanzado!'}</small>
         <div class="progress mt-1" style="height: 4px;">
-          <div class="progress-bar ${alcanzado ? 'bg-success' : 'bg-secondary'}" style="width: ${porcentaje}%"></div>
+          <div class="progress-bar bg-success" style="width: ${porcentaje}%"></div>
         </div>
       </div>
     `;
@@ -511,18 +429,21 @@ function actualizarHitos() {
 }
 
 function calcularTasaExito() {
-  if (datosRacha.diasCompletados.length === 0) return 0;
+  if (!datosRacha.dias_completados || datosRacha.dias_completados.length === 0) return 0;
   
-  const fechas = datosRacha.diasCompletados.map(d => new Date(d));
+  const fechas = datosRacha.dias_completados.map(d => new Date(d));
   const primerDia = new Date(Math.min(...fechas));
   const hoy = new Date();
   const diasTotales = Math.ceil((hoy - primerDia) / (1000 * 60 * 60 * 24)) + 1;
   
-  return Math.round((datosRacha.diasCompletados.length / diasTotales) * 100);
+  return Math.round((datosRacha.dias_completados.length / diasTotales) * 100);
 }
 
 function compartirRacha() {
-  const texto = `¡Llevo ${datosRacha.diasConsecutivos} días consecutivos entrenando con Healthy Life! 💪\nMi récord personal: ${datosRacha.recordPersonal} días.\n\n¡Únete a mi desafío! #HealthyLife #Fitness`;
+  const diasConsecutivos = datosRacha.dias_consecutivos || 0;
+  const recordPersonal = datosRacha.record_personal || 0;
+  
+  const texto = `¡Llevo ${diasConsecutivos} días consecutivos entrenando con Healthy Life! 💪\nMi récord personal: ${recordPersonal} días.\n\n¡Únete a mi desafío! #HealthyLife #Fitness`;
   
   if (navigator.share) {
     navigator.share({
@@ -531,7 +452,6 @@ function compartirRacha() {
       url: window.location.href
     });
   } else {
-    // Fallback: copiar al portapapeles
     navigator.clipboard.writeText(texto).then(() => {
       mostrarMensaje('¡Texto copiado al portapapeles! Comparte tu logro.', 'success');
     });
@@ -545,8 +465,8 @@ function configurarRecordatorio() {
   const horaInput = document.getElementById('horaRecordatorio');
   const activoInput = document.getElementById('recordatorioActivo');
   
-  if (horaInput) horaInput.value = datosRacha.recordatorio.hora;
-  if (activoInput) activoInput.checked = datosRacha.recordatorio.activo;
+  if (horaInput) horaInput.value = datosRacha.recordatorio ? datosRacha.recordatorio.hora : '19:00';
+  if (activoInput) activoInput.checked = datosRacha.recordatorio ? datosRacha.recordatorio.activo : true;
   
   const modal = new bootstrap.Modal(modalElement);
   modal.show();
@@ -556,51 +476,45 @@ function guardarRecordatorio() {
   const horaInput = document.getElementById('horaRecordatorio');
   const activoInput = document.getElementById('recordatorioActivo');
   
-  if (horaInput) datosRacha.recordatorio.hora = horaInput.value;
-  if (activoInput) datosRacha.recordatorio.activo = activoInput.checked;
-  
-  guardarDatosRacha();
-  
-  const modalElement = document.getElementById('modalRecordatorio');
-  if (modalElement) {
-    const modal = bootstrap.Modal.getInstance(modalElement);
-    if (modal) modal.hide();
-  }
-  
-  mostrarMensaje('Recordatorio configurado correctamente', 'success');
-}
+  const recordatorio = {
+    activo: activoInput ? activoInput.checked : true,
+    hora: horaInput ? horaInput.value : '19:00'
+  };
 
-function mostrarModalReinicio() {
-  const modalElement = document.getElementById('modalReiniciar');
-  if (!modalElement) return;
-  
-  const modal = new bootstrap.Modal(modalElement);
-  modal.show();
-}
-
-function reiniciarRacha() {
-  datosRacha.diasConsecutivos = 0;
-  datosRacha.diasCompletados = [];
-  datosRacha.fechaUltimoDia = null;
-  
-  guardarDatosRacha();
-  
-  const modalElement = document.getElementById('modalReiniciar');
-  if (modalElement) {
-    const modal = bootstrap.Modal.getInstance(modalElement);
-    if (modal) modal.hide();
-  }
-  
-  actualizarRacha();
-  generarCalendario();
-  actualizarEstadisticas();
-  actualizarHitos();
-  
-  mostrarMensaje('Racha reiniciada correctamente', 'info');
+  fetch('/racha/actualizar-recordatorio', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(recordatorio)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      mostrarMensaje(data.message, 'success');
+      // Actualizar datos locales
+      if (!datosRacha.recordatorio) {
+        datosRacha.recordatorio = {};
+      }
+      datosRacha.recordatorio.activo = recordatorio.activo;
+      datosRacha.recordatorio.hora = recordatorio.hora;
+    } else {
+      mostrarMensaje(data.message, 'danger');
+    }
+    
+    const modalElement = document.getElementById('modalRecordatorio');
+    if (modalElement) {
+      const modal = bootstrap.Modal.getInstance(modalElement);
+      if (modal) modal.hide();
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    mostrarMensaje('Error al actualizar el recordatorio', 'danger');
+  });
 }
 
 function mostrarMensaje(mensaje, tipo) {
-  // Crear alerta temporal
   const alerta = document.createElement('div');
   alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
   alerta.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
@@ -611,7 +525,6 @@ function mostrarMensaje(mensaje, tipo) {
   
   document.body.appendChild(alerta);
   
-  // Remover después de 3 segundos
   setTimeout(() => {
     if (alerta.parentNode) {
       alerta.remove();
@@ -669,11 +582,6 @@ function mostrarMensaje(mensaje, tipo) {
   border-color: #198754;
 }
 
-.calendar-day.missed {
-  background: #dc3545;
-  color: white;
-}
-
 .calendar-day.future {
   background: #f8f9fa;
   color: #6c757d;
@@ -699,27 +607,6 @@ function mostrarMensaje(mensaje, tipo) {
 .progress {
   height: 8px;
   border-radius: 4px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .streak-card {
-    padding: 1.5rem;
-  }
-  
-  .calendar-day {
-    width: 35px;
-    height: 35px;
-    font-size: 0.8rem;
-  }
-  
-  .streak-flame {
-    font-size: 3rem;
-  }
-  
-  h1.display-4 {
-    font-size: 2.5rem;
-  }
 }
 </style>
 {% endblock %}
