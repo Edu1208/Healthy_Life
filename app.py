@@ -38,7 +38,7 @@ except Exception as e:
 def init_db():
     if db is not None:
         collections = db.list_collection_names()
-        required_collections = ['usuarios', 'rutinas', 'notas', 'ejercicios', 'historial_rutinas', 'rachas', 'perfiles']
+        required_collections = ['usuarios', 'rutinas', 'notas', 'historial_rutinas', 'rachas']
         
         for coll in required_collections:
             if coll not in collections:
