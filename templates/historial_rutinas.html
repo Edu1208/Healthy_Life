@@ -1,35 +1,323 @@
-# Modifica la ruta existente en app.py
-@app.route('/historial-rutinas-data')
-def historial_rutinas_data():
-    if 'user_id' not in session:
-        return jsonify({'success': False, 'message': 'No autorizado'}), 401
+{% extends "base.html" %}
+{% block title %}Historial de Rutinas - Healthy Life{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="display-5 fw-bold text-success">Historial de Rutinas</h1>
+      <p class="lead text-muted">Revisa tu progreso y rutinas completadas</p>
+    </div>
+    <a href="{{ url_for('nuevo') }}" class="btn btn-success btn-lg">
+      <i class="bi bi-plus-circle me-2"></i>Nueva Rutina
+    </a>
+  </div>
+
+  <!-- Lista de Rutinas -->
+  <div class="row g-4" id="listaRutinas">
+    <!-- Las rutinas se cargarán dinámicamente -->
+  </div>
+
+  <!-- Modal para Ver Rutina -->
+  <div class="modal fade" id="modalVerRutina" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitulo">Detalles de Rutina</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modalContenido">
+          <!-- Contenido dinámico -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Confirmación -->
+  <div class="modal fade" id="modalConfirmacion" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Confirmar Acción</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="modalConfirmacionTexto">
+          ¿Estás seguro de que quieres eliminar esta rutina?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="btnConfirmarAccion">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Cargar rutinas desde el servidor
+document.addEventListener('DOMContentLoaded', function() {
+  cargarRutinasDesdeServidor();
+});
+
+function cargarRutinasDesdeServidor() {
+  fetch('/historial-rutinas-data')
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarRutinas(data.rutinas);
+      } else {
+        console.error('Error al cargar rutinas:', data.message);
+        mostrarMensaje('Error al cargar las rutinas', 'danger');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al cargar las rutinas', 'danger');
+    });
+}
+
+function mostrarRutinas(rutinas) {
+  const listaRutinas = document.getElementById('listaRutinas');
+  listaRutinas.innerHTML = '';
+
+  if (rutinas.length === 0) {
+    listaRutinas.innerHTML = `
+      <div class="col-12 text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <h4 class="text-muted mt-3">No hay rutinas registradas</h4>
+        <p class="text-muted">Crea tu primera rutina para verla aquí.</p>
+        <a href="{{ url_for('nuevo') }}" class="btn btn-success mt-3">
+          <i class="bi bi-plus-circle me-2"></i>Crear Primera Rutina
+        </a>
+      </div>
+    `;
+    return;
+  }
+
+  rutinas.forEach(rutina => {
+    const badgeColor = getBadgeColor(rutina.tipo);
     
-    id_rutina = request.args.get('id')
+    const rutinaHTML = `
+      <div class="col-12">
+        <div class="card card-modern">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <div class="d-flex align-items-start mb-2">
+                  <div class="${badgeColor} bg-opacity-10 p-2 rounded me-3">
+                    <i class="${getTipoIcono(rutina.tipo)} ${badgeColor} fs-4"></i>
+                  </div>
+                  <div>
+                    <h4 class="card-title mb-1">${rutina.nombre}</h4>
+                    <p class="text-muted mb-2">${rutina.descripcion || 'Sin descripción'}</p>
+                    <div class="d-flex gap-2 flex-wrap">
+                      <span class="badge ${badgeColor}">${rutina.tipo ? rutina.tipo.charAt(0).toUpperCase() + rutina.tipo.slice(1) : 'Sin tipo'}</span>
+                      <span class="badge bg-info">${rutina.duracion || 0} min</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 text-md-end">
+                <div class="text-muted mb-2">
+                  <i class="bi bi-calendar me-1"></i>${new Date(rutina.fecha_creacion).toLocaleDateString('es-ES')}
+                </div>
+                <div class="btn-group">
+                  <button class="btn btn-outline-primary btn-sm" onclick="verRutina('${rutina._id}')">
+                    <i class="bi bi-eye me-1"></i>Ver
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" onclick="eliminarRutina('${rutina._id}')">
+                    <i class="bi bi-trash me-1"></i>Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
     
-    try:
-        if id_rutina:
-            # Si hay un ID específico, devolver solo esa rutina
-            rutina = mongo.db.rutinas.find_one({
-                '_id': ObjectId(id_rutina),
-                'user_id': session['user_id']
-            })
-            
-            if rutina:
-                rutina['_id'] = str(rutina['_id'])
-                return jsonify({'success': True, 'rutinas': [rutina]})
-            else:
-                return jsonify({'success': False, 'message': 'Rutina no encontrada'}), 404
-        else:
-            # Si no hay ID, devolver todas las rutinas
-            rutinas_cursor = mongo.db.rutinas.find({
-                'user_id': session['user_id']
-            }).sort('fecha_creacion', -1)
-            
-            rutinas = []
-            for rutina in rutinas_cursor:
-                rutina['_id'] = str(rutina['_id'])
-                rutinas.append(rutina)
-            
-            return jsonify({'success': True, 'rutinas': rutinas})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+    listaRutinas.innerHTML += rutinaHTML;
+  });
+}
+
+function verRutina(id) {
+  // CORRECCIÓN: Usar la misma ruta que ya tienes para obtener las rutinas
+  // y filtrar por ID, o crear una nueva ruta específica
+  fetch(`/historial-rutinas-data?id=${id}`)  // Opción 1: Pasar ID como parámetro
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.rutinas && data.rutinas.length > 0) {
+        // Encontrar la rutina específica por ID
+        const rutina = data.rutinas.find(r => r._id === id);
+        if (rutina) {
+          mostrarModalRutina(rutina);
+        } else {
+          mostrarMensaje('Rutina no encontrada', 'danger');
+        }
+      } else {
+        mostrarMensaje('Error al cargar la rutina', 'danger');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al cargar la rutina', 'danger');
+    });
+}
+
+// ALTERNATIVA: Si prefieres crear una nueva ruta en el backend
+function verRutinaAlternativa(id) {
+  // Esta sería la opción si creas una ruta específica en Flask
+  fetch(`/historial/ver/${id}`)  // Necesitarías crear esta ruta en app.py
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarModalRutina(data.rutina);
+      } else {
+        mostrarMensaje(data.message, 'danger');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al cargar la rutina', 'danger');
+    });
+}
+
+function mostrarModalRutina(rutina) {
+  const modalTitulo = document.getElementById('modalTitulo');
+  const modalContenido = document.getElementById('modalContenido');
+  
+  modalTitulo.textContent = rutina.nombre;
+  
+  // Asegúrate de que ejercicios sea un array
+  let ejercicios = rutina.ejercicios || [];
+  if (typeof ejercicios === 'string') {
+    // Si ejercicios es un string, intentar convertirlo a array
+    try {
+      ejercicios = JSON.parse(ejercicios);
+    } catch {
+      // Si no es JSON válido, crear array con el string
+      ejercicios = [ejercicios];
+    }
+  }
+  
+  const ejerciciosHTML = ejercicios.length > 0 
+    ? ejercicios.map(ej => `<li class="list-group-item">${ej}</li>`).join('')
+    : '<li class="list-group-item text-muted">No hay ejercicios registrados</li>';
+  
+  modalContenido.innerHTML = `
+    <div class="row">
+      <div class="col-md-6">
+        <h6>Información General</h6>
+        <ul class="list-unstyled">
+          <li><strong>Tipo:</strong> <span class="badge ${getBadgeColor(rutina.tipo)}">${rutina.tipo ? rutina.tipo.charAt(0).toUpperCase() + rutina.tipo.slice(1) : 'Sin tipo'}</span></li>
+          <li><strong>Duración:</strong> ${rutina.duracion || 0} minutos</li>
+          <li><strong>Fecha creación:</strong> ${new Date(rutina.fecha_creacion).toLocaleDateString('es-ES')}</li>
+          ${rutina.fecha_completado ? `<li><strong>Completada:</strong> ${new Date(rutina.fecha_completado).toLocaleDateString('es-ES')}</li>` : ''}
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h6>Descripción</h6>
+        <p class="p-3 bg-light rounded">${rutina.descripcion || 'Sin descripción'}</p>
+      </div>
+    </div>
+    <div class="mt-3">
+      <h6>Ejercicios (${ejercicios.length})</h6>
+      <ul class="list-group">
+        ${ejerciciosHTML}
+      </ul>
+    </div>
+  `;
+  
+  const modal = new bootstrap.Modal(document.getElementById('modalVerRutina'));
+  modal.show();
+}
+
+function eliminarRutina(id) {
+  document.getElementById('modalConfirmacionTexto').textContent = 
+    '¿Estás seguro de que quieres eliminar esta rutina? Esta acción no se puede deshacer.';
+  
+  const btnConfirmar = document.getElementById('btnConfirmarAccion');
+  btnConfirmar.onclick = function() {
+    fetch(`/historial/eliminar/${id}`, {
+      method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        mostrarMensaje(data.message, 'success');
+        cargarRutinasDesdeServidor();
+      } else {
+        mostrarMensaje(data.message, 'danger');
+      }
+      
+      const modal = bootstrap.Modal.getInstance(document.getElementById('modalConfirmacion'));
+      modal.hide();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      mostrarMensaje('Error al eliminar la rutina', 'danger');
+    });
+  };
+  
+  const modal = new bootstrap.Modal(document.getElementById('modalConfirmacion'));
+  modal.show();
+}
+
+// Funciones auxiliares
+function getBadgeColor(tipo) {
+  const colores = {
+    'fuerza': 'bg-primary',
+    'cardio': 'bg-danger', 
+    'velocidad': 'bg-warning',
+    'flexibilidad': 'bg-info'
+  };
+  return colores[tipo] || 'bg-secondary';
+}
+
+function getTipoIcono(tipo) {
+  const iconos = {
+    'fuerza': 'bi bi-dumbbell',
+    'cardio': 'bi bi-heart-pulse',
+    'velocidad': 'bi bi-lightning-charge',
+    'flexibilidad': 'bi bi-arrow-repeat'
+  };
+  return iconos[tipo] || 'bi bi-activity';
+}
+
+function mostrarMensaje(mensaje, tipo) {
+  const alerta = document.createElement('div');
+  alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+  alerta.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+  alerta.innerHTML = `
+    ${mensaje}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  
+  document.body.appendChild(alerta);
+  
+  setTimeout(() => {
+    if (alerta.parentNode) {
+      alerta.remove();
+    }
+  }, 3000);
+}
+</script>
+
+<style>
+.card-modern {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+</style>
+{% endblock %}
